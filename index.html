@@ -226,16 +226,16 @@
     .items-grid {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
     .item-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
-      padding: 14px;
+      padding: 12px;
       display: flex;
-      justify-content: space-between;
+      gap: 12px;
       align-items: center;
       transition: transform 0.2s, border-color 0.2s;
     }
@@ -245,9 +245,17 @@
       border-color: rgba(221, 170, 56, 0.4);
     }
 
+    .item-img {
+      width: 65px;
+      height: 65px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid var(--card-border);
+      flex-shrink: 0;
+    }
+
     .item-details {
       flex: 1;
-      padding-inline-end: 12px;
     }
 
     .item-name {
@@ -274,11 +282,11 @@
 
     .price-container {
       text-align: end;
-      min-width: 80px;
+      min-width: 75px;
     }
 
     .price-value {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 800;
       color: var(--accent-gold);
     }
@@ -346,12 +354,10 @@
     <p id="txt-footer">نادي الجلاء للقوات المسلحة &copy; 2026</p>
   </footer>
 
-  <!-- مكتبات Firebase بنسخة الويب المتوافقة مع المتصفحات المباشرة -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
-    // تهيئة Firebase بالبيانات الخاصة بمشروعك
     const firebaseConfig = {
       apiKey: "AIzaSyALAk-3SXOw7kmrwKrGp5cp9o77Nxf9Ufo",
       authDomain: "galaa-menu.firebaseapp.com",
@@ -365,20 +371,20 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const defaultData = [
+    const initialBackupData = [
       {
         id: "salads",
         name_ar: "السلطات",
         name_en: "Salads",
         icon: "fa-leaf",
         items: [
-          { name_ar: "سلطة خضراء", name_en: "Green Salad", desc_ar: "خضروات طازجة متبلة", desc_en: "Fresh mixed vegetables", member_price: 25, guest_price: 35 },
-          { name_ar: "سلطة بلدي", name_en: "Baladi Salad", desc_ar: "طماطم، خيار، بقدونس، تتبيلة مصرية", desc_en: "Egyptian traditional spiced salad", member_price: 25, guest_price: 35 },
-          { name_ar: "سلطة بابا غنوج", name_en: "Baba Ghanoush", desc_ar: "باذنجان مشوي بالطحينة", desc_en: "Roasted eggplant with tahini", member_price: 30, guest_price: 40 },
-          { name_ar: "سلطة زبادي", name_en: "Yogurt Salad", desc_ar: "زبادي طازج بالنعناع والخيار", desc_en: "Yogurt with mint & cucumber", member_price: 30, guest_price: 40 },
-          { name_ar: "سلطة طحينة", name_en: "Tahini Salad", desc_ar: "طحينة بيضاء شهية", desc_en: "Pure spiced sesame tahini", member_price: 25, guest_price: 35 },
-          { name_ar: "سلطة كلو سلو", name_en: "Coleslaw Salad", desc_ar: "كرنب وجزر بصوص كريمي", desc_en: "Shredded cabbage with dressing", member_price: 35, guest_price: 45 },
-          { name_ar: "مخلل مشكل", name_en: "Mixed Pickles", desc_ar: "تشكيلة مخللات بلدي", desc_en: "Traditional oriental pickles", member_price: 20, guest_price: 25 }
+          { name_ar: "سلطة خضراء", name_en: "Green Salad", desc_ar: "خضروات طازجة متبلة", desc_en: "Fresh mixed vegetables", member_price: 25, guest_price: 35, img: "" },
+          { name_ar: "سلطة بلدي", name_en: "Baladi Salad", desc_ar: "طماطم، خيار، بقدونس، تتبيلة مصرية", desc_en: "Egyptian traditional spiced salad", member_price: 25, guest_price: 35, img: "" },
+          { name_ar: "سلطة بابا غنوج", name_en: "Baba Ghanoush", desc_ar: "باذنجان مشوي بالطحينة", desc_en: "Roasted eggplant with tahini", member_price: 30, guest_price: 40, img: "" },
+          { name_ar: "سلطة زبادي", name_en: "Yogurt Salad", desc_ar: "زبادي طازج بالنعناع والخيار", desc_en: "Yogurt with mint & cucumber", member_price: 30, guest_price: 40, img: "" },
+          { name_ar: "سلطة طحينة", name_en: "Tahini Salad", desc_ar: "طحينة بيضاء شهية", desc_en: "Pure spiced sesame tahini", member_price: 25, guest_price: 35, img: "" },
+          { name_ar: "سلطة كلو سلو", name_en: "Coleslaw Salad", desc_ar: "كرنب وجزر بصوص كريمي", desc_en: "Shredded cabbage with dressing", member_price: 35, guest_price: 45, img: "" },
+          { name_ar: "مخلل مشكل", name_en: "Mixed Pickles", desc_ar: "تشكيلة مخللات بلدي", desc_en: "Traditional oriental pickles", member_price: 20, guest_price: 25, img: "" }
         ]
       },
       {
@@ -387,10 +393,10 @@
         name_en: "Soups",
         icon: "fa-bowl-hot",
         items: [
-          { name_ar: "شوربة خضار", name_en: "Vegetable Soup", desc_ar: "خضار مشكل طازج", desc_en: "Fresh mixed vegetable soup", member_price: 35, guest_price: 45 },
-          { name_ar: "شوربة لسان عصفور", name_en: "Orzo Soup", desc_ar: "شوربة لسان عصفور بمرق دافئ", desc_en: "Traditional orzo pasta broth", member_price: 30, guest_price: 40 },
-          { name_ar: "شوربة شعرية", name_en: "Vermicelli Soup", desc_ar: "شعرية محمرة بالمرقة", desc_en: "Toasted vermicelli soup", member_price: 30, guest_price: 40 },
-          { name_ar: "شوربة فراخ بالكريمة", name_en: "Cream of Chicken Soup", desc_ar: "قطع دجاج مع صصوص الكريمة", desc_en: "Velvety chicken cream soup", member_price: 50, guest_price: 65 }
+          { name_ar: "شوربة خضار", name_en: "Vegetable Soup", desc_ar: "خضار مشكل طازج", desc_en: "Fresh mixed vegetable soup", member_price: 35, guest_price: 45, img: "" },
+          { name_ar: "شوربة لسان عصفور", name_en: "Orzo Soup", desc_ar: "شوربة لسان عصفور بمرق دافئ", desc_en: "Traditional orzo pasta broth", member_price: 30, guest_price: 40, img: "" },
+          { name_ar: "شوربة شعرية", name_en: "Vermicelli Soup", desc_ar: "شعرية محمرة بالمرقة", desc_en: "Toasted vermicelli soup", member_price: 30, guest_price: 40, img: "" },
+          { name_ar: "شوربة فراخ بالكريمة", name_en: "Cream of Chicken Soup", desc_ar: "قطع دجاج مع صوص الكريمة", desc_en: "Velvety chicken cream soup", member_price: 50, guest_price: 65, img: "" }
         ]
       },
       {
@@ -399,12 +405,12 @@
         name_en: "Appetizers",
         icon: "fa-utensils",
         items: [
-          { name_ar: "سمبوسك جبنة", name_en: "Cheese Sambousek", desc_ar: "محشوة بتشكيلة جبن", desc_en: "Crispy cheese filled pastry", member_price: 40, guest_price: 50 },
-          { name_ar: "سمبوسك لحم", name_en: "Meat Sambousek", desc_ar: "محشوة باللحمة المفرومة", desc_en: "Spiced minced meat pastry", member_price: 45, guest_price: 55 },
-          { name_ar: "كبيبة", name_en: "Kobeiba", desc_ar: "برغل ولحم بلدي", desc_en: "Cracked wheat shells with beef", member_price: 50, guest_price: 65 },
-          { name_ar: "ورق عنب", name_en: "Stuffed Grape Leaves", desc_ar: "ورق عنب بالخلطة ودبس الرمان", desc_en: "Rice stuffed grape leaves", member_price: 45, guest_price: 60 },
-          { name_ar: "أورديفر", name_en: "Hors D'oeuvre", desc_ar: "تشكيلة مقبلات مشكلة", desc_en: "Chef appetizer selection", member_price: 70, guest_price: 90 },
-          { name_ar: "ممبار", name_en: "Mombar", desc_ar: "ممبار محمر بالأرز المتبل", desc_en: "Crispy stuffed sausage", member_price: 60, guest_price: 75 }
+          { name_ar: "سمبوسك جبنة", name_en: "Cheese Sambousek", desc_ar: "محشوة بتشكيلة جبن", desc_en: "Crispy cheese filled pastry", member_price: 40, guest_price: 50, img: "" },
+          { name_ar: "سمبوسك لحم", name_en: "Meat Sambousek", desc_ar: "محشوة باللحمة المفرومة", desc_en: "Spiced minced meat pastry", member_price: 45, guest_price: 55, img: "" },
+          { name_ar: "كبيبة", name_en: "Kobeiba", desc_ar: "برغل ولحم بلدي", desc_en: "Cracked wheat shells with beef", member_price: 50, guest_price: 65, img: "" },
+          { name_ar: "ورق عنب", name_en: "Stuffed Grape Leaves", desc_ar: "ورق عنب بالخلطة ودبس الرمان", desc_en: "Rice stuffed grape leaves", member_price: 45, guest_price: 60, img: "" },
+          { name_ar: "أورديفر", name_en: "Hors D'oeuvre", desc_ar: "تشكيلة مقبلات مشكلة", desc_en: "Chef appetizer selection", member_price: 70, guest_price: 90, img: "" },
+          { name_ar: "ممبار", name_en: "Mombar", desc_ar: "ممبار محمر بالأرز المتبل", desc_en: "Crispy stuffed sausage", member_price: 60, guest_price: 75, img: "" }
         ]
       },
       {
@@ -413,19 +419,19 @@
         name_en: "Carbohydrates",
         icon: "fa-wheat-awn",
         items: [
-          { name_ar: "مكرونة سادة", name_en: "Plain Pasta", desc_ar: "مكرونة مسلوقة بالزبدة", desc_en: "Boiled buttered pasta", member_price: 30, guest_price: 40 },
-          { name_ar: "مكرونة فرن باللحمة", name_en: "Baked Béchamel Pasta", desc_ar: "طاجن بشاميل باللحمة المفرومة", desc_en: "Baked pasta with minced meat", member_price: 65, guest_price: 85 },
-          { name_ar: "مكرونة بالصلصة واللحمة المفرومة", name_en: "Bolognese Pasta", desc_ar: "مكرونة بصوص الطماطم واللحم", desc_en: "Pasta with tomato meat sauce", member_price: 60, guest_price: 80 },
-          { name_ar: "أرز بسمتي بالخلطة", name_en: "Basmati Rice with Khaltah", desc_ar: "أرز بالمكسرات والتوابل", desc_en: "Spiced basmati rice with nuts", member_price: 50, guest_price: 65 },
-          { name_ar: "أرز بالخلطة", name_en: "Egyptian Khaltah Rice", desc_ar: "أرز مصري مكرمل بالبهار", desc_en: "Caramelized oriental rice", member_price: 40, guest_price: 55 },
-          { name_ar: "أرز سادة", name_en: "Plain White Rice", desc_ar: "أرز مصري أبيض بالسمن", desc_en: "Steamed Egyptian rice", member_price: 25, guest_price: 35 },
-          { name_ar: "أرز شعرية", name_en: "Vermicelli Rice", desc_ar: "أرز مصري بالشعرية المحمرة", desc_en: "Rice with toasted vermicelli", member_price: 30, guest_price: 40 },
-          { name_ar: "مكرونة وايت صوص فراخ ومشروم", name_en: "Chicken Mushroom Alfredo", desc_ar: "مكرونة بصوص الكريمة والدجاج", desc_en: "Creamy chicken mushroom pasta", member_price: 75, guest_price: 95 }
+          { name_ar: "مكرونة سادة", name_en: "Plain Pasta", desc_ar: "مكرونة مسلوقة بالزبدة", desc_en: "Boiled buttered pasta", member_price: 30, guest_price: 40, img: "" },
+          { name_ar: "مكرونة فرن باللحمة", name_en: "Baked Béchamel Pasta", desc_ar: "طاجن بشاميل باللحمة المفرومة", desc_en: "Baked pasta with minced meat", member_price: 65, guest_price: 85, img: "" },
+          { name_ar: "مكرونة بالصلصة واللحمة المفرومة", name_en: "Bolognese Pasta", desc_ar: "مكرونة بصوص الطماطم واللحم", desc_en: "Pasta with tomato meat sauce", member_price: 60, guest_price: 80, img: "" },
+          { name_ar: "أرز بسمتي بالخلطة", name_en: "Basmati Rice with Khaltah", desc_ar: "أرز بالمكسرات والتوابل", desc_en: "Spiced basmati rice with nuts", member_price: 50, guest_price: 65, img: "" },
+          { name_ar: "أرز بالخلطة", name_en: "Egyptian Khaltah Rice", desc_ar: "أرز مصري مكرمل بالبهار", desc_en: "Caramelized oriental rice", member_price: 40, guest_price: 55, img: "" },
+          { name_ar: "أرز سادة", name_en: "Plain White Rice", desc_ar: "أرز مصري أبيض بالسمن", desc_en: "Steamed Egyptian rice", member_price: 25, guest_price: 35, img: "" },
+          { name_ar: "أرز شعرية", name_en: "Vermicelli Rice", desc_ar: "أرز مصري بالشعرية المحمرة", desc_en: "Rice with toasted vermicelli", member_price: 30, guest_price: 40, img: "" },
+          { name_ar: "مكرونة وايت صصوص فراخ ومشروم", name_en: "Chicken Mushroom Alfredo", desc_ar: "مكرونة بصوص الكريمة والدجاج", desc_en: "Creamy chicken mushroom pasta", member_price: 75, guest_price: 95, img: "" }
         ]
       }
     ];
 
-    let menuData = defaultData;
+    let menuData = initialBackupData;
     let currentLang = 'ar';
     let currentPricingMode = 'member';
     let currentFilter = '';
@@ -489,7 +495,7 @@
       menuData.forEach((cat, index) => {
         const chip = document.createElement('button');
         chip.className = `category-chip ${index === 0 ? 'active' : ''}`;
-        chip.innerHTML = `<i class="fa-solid ${cat.icon || 'fa-utensils'}"></i> ${currentLang === 'ar' ? cat.name_ar : cat.name_en}`;
+        chip.innerHTML = `<i class="fa-solid ${cat.icon || 'fa-utensils'}"></i> ${currentLang === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)}`;
         chip.onclick = () => {
           document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
           chip.classList.add('active');
@@ -506,8 +512,8 @@
       container.innerHTML = '';
 
       menuData.forEach(cat => {
-        const filteredItems = cat.items.filter(item => {
-          const name = currentLang === 'ar' ? item.name_ar : item.name_en;
+        const filteredItems = (cat.items || []).filter(item => {
+          const name = currentLang === 'ar' ? item.name_ar : (item.name_en || item.name_ar);
           const desc = currentLang === 'ar' ? (item.desc_ar || '') : (item.desc_en || '');
           return name.toLowerCase().includes(currentFilter.toLowerCase()) || 
                  desc.toLowerCase().includes(currentFilter.toLowerCase());
@@ -521,7 +527,7 @@
 
         const title = document.createElement('h2');
         title.className = 'section-title';
-        title.innerHTML = `<i class="fa-solid ${cat.icon || 'fa-utensils'}"></i> ${currentLang === 'ar' ? cat.name_ar : cat.name_en}`;
+        title.innerHTML = `<i class="fa-solid ${cat.icon || 'fa-utensils'}"></i> ${currentLang === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)}`;
         section.appendChild(title);
 
         const grid = document.createElement('div');
@@ -533,10 +539,12 @@
 
           const price = currentPricingMode === 'member' ? item.member_price : item.guest_price;
           const priceLabel = currentPricingMode === 'member' ? t.memberPriceLabel : t.guestPriceLabel;
+          const imgSrc = item.img && item.img.trim() !== '' ? item.img : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120&auto=format&fit=crop&q=60';
 
           card.innerHTML = `
+            <img src="${imgSrc}" class="item-img" alt="${item.name_ar}" onerror="this.src='https://via.placeholder.com/65/24242A/FFFFFF?text=Dish'">
             <div class="item-details">
-              <div class="item-name">${currentLang === 'ar' ? item.name_ar : item.name_en}</div>
+              <div class="item-name">${currentLang === 'ar' ? item.name_ar : (item.name_en || item.name_ar)}</div>
               <div class="item-desc">${currentLang === 'ar' ? (item.desc_ar || '') : (item.desc_en || '')}</div>
               ${currentPricingMode === 'member' ? `<span class="member-badge"><i class="fa-solid fa-id-badge"></i> عضوية</span>` : ''}
             </div>
@@ -558,15 +566,23 @@
       renderMenu();
     }
 
-    // الاستماع المباشر للتحديثات من Firestore
+    // مزامنة Firestore مع النسخة الاحتياطية المباشرة
     db.collection("menu").doc("categories").onSnapshot((doc) => {
-      if (doc.exists && doc.data().list) {
+      if (doc.exists && doc.data().list && doc.data().list.length > 0) {
         menuData = doc.data().list;
       } else {
-        // في أول تشغيل يتم حفظ البيانات الافتراضية في قاعدة البيانات السحابية
-        db.collection("menu").doc("categories").set({ list: defaultData });
-        menuData = defaultData;
+        menuData = initialBackupData;
       }
       renderCategories();
       renderMenu();
-    }, (err
+    }, () => {
+      menuData = initialBackupData;
+      renderCategories();
+      renderMenu();
+    });
+
+    renderCategories();
+    renderMenu();
+  </script>
+</body>
+</html>
