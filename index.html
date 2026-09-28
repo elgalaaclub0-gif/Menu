@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>قائمة طعام | نادي الجلاء للقوات المسلحة</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary-red: #A31219;
+      --dark-red: #66080D;
+      --accent-gold: #DDAA38;
+      --gold-light: #F7E7A6;
+      --bg-dark: #121214;
+      --card-bg: #1B1B1F;
+      --card-border: #2C2C32;
+      --text-main: #FFFFFF;
+      --text-muted: #A0A0A8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body.en {
+      font-family: 'Outfit', sans-serif;
+      direction: ltr;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 50px;
+    }
+
+    header {
+      background: linear-gradient(180deg, var(--dark-red) 0%, rgba(18, 18, 20, 0.95) 100%);
+      padding: 24px 16px 16px;
+      text-align: center;
+      border-bottom: 1px solid rgba(221, 170, 56, 0.25);
+    }
+
+    .top-controls {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .lang-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .logo-container {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(135deg, var(--accent-gold), transparent, var(--accent-gold));
+      box-shadow: 0 4px 20px rgba(163, 18, 25, 0.4);
+      overflow: hidden;
+    }
+
+    .logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .club-title {
+      font-size: 21px;
+      font-weight: 800;
+      color: var(--gold-light);
+      margin-bottom: 4px;
+    }
+
+    .sub-title {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .pricing-toggle-wrapper {
+      margin: 18px auto 6px;
+      max-width: 320px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--card-border);
+      border-radius: 30px;
+      padding: 4px;
+      display: flex;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      text-align: center;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 25px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .toggle-btn.active {
+      background: var(--primary-red);
+      color: #fff;
+    }
+
+    .toggle-btn.member.active {
+      background: linear-gradient(135deg, #B8860B, var(--accent-gold));
+      color: #121214;
+    }
+
+    .search-box-container {
+      padding: 12px 16px 4px;
+    }
+
+    .search-bar {
+      position: relative;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .search-bar input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 11px 40px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search-bar i {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    body:not(.en) .search-bar i { right: 14px; }
+    body.en .search-bar i { left: 14px; }
+
+    .categories-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      background: rgba(18, 18, 20, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      border-bottom: 1px solid var(--card-border);
+      scrollbar-width: none;
+    }
+    .categories-bar::-webkit-scrollbar { display: none; }
+
+    .category-chip {
+      white-space: nowrap;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .category-chip.active {
+      background: var(--primary-red);
+      color: #fff;
+      border-color: var(--accent-gold);
+    }
+
+    .menu-container {
+      padding: 16px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .category-section {
+      margin-bottom: 26px;
+      scroll-margin-top: 70px;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--accent-gold);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px dashed rgba(221, 170, 56, 0.3);
+      padding-bottom: 6px;
+    }
+
+    .items-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .item-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(221, 170, 56, 0.4);
+    }
+
+    .item-details {
+      flex: 1;
+      padding-inline-end: 12px;
+    }
+
+    .item-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 2px;
+    }
+
+    .item-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .member-badge {
+      display: inline-block;
+      font-size: 10px;
+      background: rgba(221, 170, 56, 0.15);
+      color: var(--accent-gold);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+
+    .price-container {
+      text-align: end;
+      min-width: 80px;
+    }
+
+    .price-value {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--accent-gold);
+    }
+
+    .currency {
+      font-size: 11px;
+    }
+
+    .price-type-label {
+      display: block;
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--card-border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="top-controls">
+      <button class="lang-btn" onclick="toggleLanguage()">
+        <i class="fa-solid fa-globe"></i>
+        <span id="lang-label">English</span>
+      </button>
+    </div>
+
+    <div class="logo-container">
+      <img src="435341.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/90/A31219/FFFFFF?text=Galaa'">
+    </div>
+
+    <h1 class="club-title" id="txt-title">نادي وفنادق القوات المسلحة</h1>
+    <p class="sub-title" id="txt-sub">قائمة الأطعمة والمشروبات | نادي الجلاء</p>
+
+    <div class="pricing-toggle-wrapper">
+      <button class="toggle-btn member active" id="btn-member" onclick="setPriceMode('member')">
+        <i class="fa-solid fa-id-card"></i>
+        <span id="txt-member-btn">حاملي العضوية</span>
+      </button>
+      <button class="toggle-btn" id="btn-guest" onclick="setPriceMode('guest')">
+        <i class="fa-solid fa-user"></i>
+        <span id="txt-guest-btn">الزائرين</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="search-box-container">
+    <div class="search-bar">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="search-input" placeholder="ابحث عن صنف أو طبق..." oninput="handleSearch()">
+    </div>
+  </div>
+
+  <div class="categories-bar" id="categories-bar"></div>
+  <main class="menu-container" id="menu-container"></main>
+
+  <footer>
+    <p id="txt-footer">نادي الجلاء للقوات المسلحة &copy; 2026</p>
+  </footer>
+
+  <!-- مكتبات Firebase بنسخة الويب المتوافقة مع المتصفحات المباشرة -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // تهيئة Firebase بالبيانات الخاصة بمشروعك
+    const firebaseConfig = {
+      apiKey: "AIzaSyALAk-3SXOw7kmrwKrGp5cp9o77Nxf9Ufo",
+      authDomain: "galaa-menu.firebaseapp.com",
+      projectId: "galaa-menu",
+      storageBucket: "galaa-menu.firebasestorage.app",
+      messagingSenderId: "853813647144",
+      appId: "1:853813647144:web:f7bf868ce7af3bd4dda21d",
+      measurementId: "G-BH18Y6JBGW"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const defaultData = [
+      {
+        id: "salads",
+        name_ar: "السلطات",
+        name_en: "Salads",
+        icon: "fa-leaf",
+        items: [
+          { name_ar: "سلطة خضراء", name_en: "Green Salad", desc_ar: "خضروات طازجة متبلة", desc_en: "Fresh mixed vegetables", member_price: 25, guest_price: 35 },
+          { name_ar: "سلطة بلدي", name_en: "Baladi Salad", desc_ar: "طماطم، خيار، بقدونس، تتبيلة مصرية", desc_en: "Egyptian traditional spiced salad", member_price: 25, guest_price: 35 },
+          { name_ar: "سلطة بابا غنوج", name_en: "Baba Ghanoush", desc_ar: "باذنجان مشوي بالطحينة", desc_en: "Roasted eggplant with tahini", member_price: 30, guest_price: 40 },
+          { name_ar: "سلطة زبادي", name_en: "Yogurt Salad", desc_ar: "زبادي طازج بالنعناع والخيار", desc_en: "Yogurt with mint & cucumber", member_price: 30, guest_price: 40 },
+          { name_ar: "سلطة طحينة", name_en: "Tahini Salad", desc_ar: "طحينة بيضاء شهية", desc_en: "Pure spiced sesame tahini", member_price: 25, guest_price: 35 },
+          { name_ar: "سلطة كلو سلو", name_en: "Coleslaw Salad", desc_ar: "كرنب وجزر بصوص كريمي", desc_en: "Shredded cabbage with dressing", member_price: 35, guest_price: 45 },
+          { name_ar: "مخلل مشكل", name_en: "Mixed Pickles", desc_ar: "تشكيلة مخللات بلدي", desc_en: "Traditional oriental pickles", member_price: 20, guest_price: 25 }
+        ]
+      },
+      {
+        id: "soups",
+        name_ar: "الشوربة",
+        name_en: "Soups",
+        icon: "fa-bowl-hot",
+        items: [
+          { name_ar: "شوربة خضار", name_en: "Vegetable Soup", desc_ar: "خضار مشكل طازج", desc_en: "Fresh mixed vegetable soup", member_price: 35, guest_price: 45 },
+          { name_ar: "شوربة لسان عصفور", name_en: "Orzo Soup", desc_ar: "شوربة لسان عصفور بمرق دافئ", desc_en: "Traditional orzo pasta broth", member_price: 30, guest_price: 40 },
+          { name_ar: "شوربة شعرية", name_en: "Vermicelli Soup", desc_ar: "شعرية محمرة بالمرقة", desc_en: "Toasted vermicelli soup", member_price: 30, guest_price: 40 },
+          { name_ar: "شوربة فراخ بالكريمة", name_en: "Cream of Chicken Soup", desc_ar: "قطع دجاج مع صصوص الكريمة", desc_en: "Velvety chicken cream soup", member_price: 50, guest_price: 65 }
+        ]
+      },
+      {
+        id: "appetizers",
+        name_ar: "فواتح شهية",
+        name_en: "Appetizers",
+        icon: "fa-utensils",
+        items: [
+          { name_ar: "سمبوسك جبنة", name_en: "Cheese Sambousek", desc_ar: "محشوة بتشكيلة جبن", desc_en: "Crispy cheese filled pastry", member_price: 40, guest_price: 50 },
+          { name_ar: "سمبوسك لحم", name_en: "Meat Sambousek", desc_ar: "محشوة باللحمة المفرومة", desc_en: "Spiced minced meat pastry", member_price: 45, guest_price: 55 },
+          { name_ar: "كبيبة", name_en: "Kobeiba", desc_ar: "برغل ولحم بلدي", desc_en: "Cracked wheat shells with beef", member_price: 50, guest_price: 65 },
+          { name_ar: "ورق عنب", name_en: "Stuffed Grape Leaves", desc_ar: "ورق عنب بالخلطة ودبس الرمان", desc_en: "Rice stuffed grape leaves", member_price: 45, guest_price: 60 },
+          { name_ar: "أورديفر", name_en: "Hors D'oeuvre", desc_ar: "تشكيلة مقبلات مشكلة", desc_en: "Chef appetizer selection", member_price: 70, guest_price: 90 },
+          { name_ar: "ممبار", name_en: "Mombar", desc_ar: "ممبار محمر بالأرز المتبل", desc_en: "Crispy stuffed sausage", member_price: 60, guest_price: 75 }
+        ]
+      },
+      {
+        id: "carbs",
+        name_ar: "النشويات",
+        name_en: "Carbohydrates",
+        icon: "fa-wheat-awn",
+        items: [
+          { name_ar: "مكرونة سادة", name_en: "Plain Pasta", desc_ar: "مكرونة مسلوقة بالزبدة", desc_en: "Boiled buttered pasta", member_price: 30, guest_price: 40 },
+          { name_ar: "مكرونة فرن باللحمة", name_en: "Baked Béchamel Pasta", desc_ar: "طاجن بشاميل باللحمة المفرومة", desc_en: "Baked pasta with minced meat", member_price: 65, guest_price: 85 },
+          { name_ar: "مكرونة بالصلصة واللحمة المفرومة", name_en: "Bolognese Pasta", desc_ar: "مكرونة بصوص الطماطم واللحم", desc_en: "Pasta with tomato meat sauce", member_price: 60, guest_price: 80 },
+          { name_ar: "أرز بسمتي بالخلطة", name_en: "Basmati Rice with Khaltah", desc_ar: "أرز بالمكسرات والتوابل", desc_en: "Spiced basmati rice with nuts", member_price: 50, guest_price: 65 },
+          { name_ar: "أرز بالخلطة", name_en: "Egyptian Khaltah Rice", desc_ar: "أرز مصري مكرمل بالبهار", desc_en: "Caramelized oriental rice", member_price: 40, guest_price: 55 },
+          { name_ar: "أرز سادة", name_en: "Plain White Rice", desc_ar: "أرز مصري أبيض بالسمن", desc_en: "Steamed Egyptian rice", member_price: 25, guest_price: 35 },
+          { name_ar: "أرز شعرية", name_en: "Vermicelli Rice", desc_ar: "أرز مصري بالشعرية المحمرة", desc_en: "Rice with toasted vermicelli", member_price: 30, guest_price: 40 },
+          { name_ar: "مكرونة وايت صوص فراخ ومشروم", name_en: "Chicken Mushroom Alfredo", desc_ar: "مكرونة بصوص الكريمة والدجاج", desc_en: "Creamy chicken mushroom pasta", member_price: 75, guest_price: 95 }
+        ]
+      }
+    ];
+
+    let menuData = defaultData;
+    let currentLang = 'ar';
+    let currentPricingMode = 'member';
+    let currentFilter = '';
+
+    const translations = {
+      ar: {
+        langBtn: "English",
+        title: "نادي وفنادق القوات المسلحة",
+        sub: "قائمة الأطعمة والمشروبات | نادي الجلاء",
+        memberBtn: "حاملي العضوية",
+        guestBtn: "الزائرين",
+        searchPlaceholder: "ابحث عن صنف أو طبق...",
+        currency: "ج.م",
+        memberPriceLabel: "سعر العضوية",
+        guestPriceLabel: "سعر الزائر",
+        footer: "نادي الجلاء للقوات المسلحة © 2026"
+      },
+      en: {
+        langBtn: "العربية",
+        title: "Armed Forces Clubs & Hotels",
+        sub: "Food & Beverage Menu | Al-Galaa Club",
+        memberBtn: "Club Members",
+        guestBtn: "Visitors / Guests",
+        searchPlaceholder: "Search for dishes...",
+        currency: "EGP",
+        memberPriceLabel: "Member Price",
+        guestPriceLabel: "Visitor Price",
+        footer: "Al-Galaa Armed Forces Club © 2026"
+      }
+    };
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      document.body.className = currentLang === 'en' ? 'en' : '';
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+      
+      const t = translations[currentLang];
+      document.getElementById('lang-label').innerText = t.langBtn;
+      document.getElementById('txt-title').innerText = t.title;
+      document.getElementById('txt-sub').innerText = t.sub;
+      document.getElementById('txt-member-btn').innerText = t.memberBtn;
+      document.getElementById('txt-guest-btn').innerText = t.guestBtn;
+      document.getElementById('search-input').placeholder = t.searchPlaceholder;
+      document.getElementById('txt-footer').innerText = t.footer;
+
+      renderCategories();
+      renderMenu();
+    }
+
+    function setPriceMode(mode) {
+      currentPricingMode = mode;
+      document.getElementById('btn-member').classList.toggle('active', mode === 'member');
+      document.getElementById('btn-guest').classList.toggle('active', mode === 'guest');
+      renderMenu();
+    }
+
+    function renderCategories() {
+      const bar = document.getElementById('categories-bar');
+      bar.innerHTML = '';
+      menuData.forEach((cat, index) => {
+        const chip = document.createElement('button');
+        chip.className = `category-chip ${index === 0 ? 'active' : ''}`;
+        chip.innerHTML = `<i class="fa-solid ${cat.icon || 'fa-utensils'}"></i> ${currentLang === 'ar' ? cat.name_ar : cat.name_en}`;
+        chip.onclick = () => {
+          document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          const target = document.getElementById(`cat-${cat.id}`);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+        };
+        bar.appendChild(chip);
+      });
+    }
+
+    function renderMenu() {
+      const container = document.getElementById('menu-container');
+      const t = translations[currentLang];
+      container.innerHTML = '';
+
+      menuData.forEach(cat => {
+        const filteredItems = cat.items.filter(item => {
+          const name = currentLang === 'ar' ? item.name_ar : item.name_en;
+          const desc = currentLang === 'ar' ? (item.desc_ar || '') : (item.desc_en || '');
+          return name.toLowerCase().includes(currentFilter.toLowerCase()) || 
+                 desc.toLowerCase().includes(currentFilter.toLowerCase());
+        });
+
+        if (filteredItems.length === 0) return;
+
+        const section = document.createElement('section');
+        section.className = 'category-section';
+        section.id = `cat-${cat.id}`;
+
+        const title = document.createElement('h2');
+        title.className = 'section-title';
+        title.innerHTML = `<i class="fa-solid ${cat.icon || 'fa-utensils'}"></i> ${currentLang === 'ar' ? cat.name_ar : cat.name_en}`;
+        section.appendChild(title);
+
+        const grid = document.createElement('div');
+        grid.className = 'items-grid';
+
+        filteredItems.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'item-card';
+
+          const price = currentPricingMode === 'member' ? item.member_price : item.guest_price;
+          const priceLabel = currentPricingMode === 'member' ? t.memberPriceLabel : t.guestPriceLabel;
+
+          card.innerHTML = `
+            <div class="item-details">
+              <div class="item-name">${currentLang === 'ar' ? item.name_ar : item.name_en}</div>
+              <div class="item-desc">${currentLang === 'ar' ? (item.desc_ar || '') : (item.desc_en || '')}</div>
+              ${currentPricingMode === 'member' ? `<span class="member-badge"><i class="fa-solid fa-id-badge"></i> عضوية</span>` : ''}
+            </div>
+            <div class="price-container">
+              <div class="price-value">${price} <span class="currency">${t.currency}</span></div>
+              <span class="price-type-label">${priceLabel}</span>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        section.appendChild(grid);
+        container.appendChild(section);
+      });
+    }
+
+    function handleSearch() {
+      currentFilter = document.getElementById('search-input').value.trim();
+      renderMenu();
+    }
+
+    // الاستماع المباشر للتحديثات من Firestore
+    db.collection("menu").doc("categories").onSnapshot((doc) => {
+      if (doc.exists && doc.data().list) {
+        menuData = doc.data().list;
+      } else {
+        // في أول تشغيل يتم حفظ البيانات الافتراضية في قاعدة البيانات السحابية
+        db.collection("menu").doc("categories").set({ list: defaultData });
+        menuData = defaultData;
+      }
+      renderCategories();
+      renderMenu();
+    }, (err
