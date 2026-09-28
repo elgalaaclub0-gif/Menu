@@ -2,115 +2,357 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم | منيو نادي الجلاء</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>قائمة طعام | نادي الجلاء للقوات المسلحة</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
     :root {
-      --primary: #A31219;
-      --gold: #DDAA38;
-      --bg: #121214;
-      --card: #1B1B1F;
-      --border: #2C2C32;
+      --primary-red: #A31219;
+      --dark-red: #66080D;
+      --accent-gold: #DDAA38;
+      --gold-light: #F7E7A6;
+      --bg-dark: #121214;
+      --card-bg: #1B1B1F;
+      --card-border: #2C2C32;
+      --text-main: #FFFFFF;
+      --text-muted: #A0A0A8;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-    body { background: var(--bg); color: #fff; padding: 20px 15px; }
-    .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
-    .header h1 { color: var(--gold); font-size: 22px; }
-    
-    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; max-width: 650px; margin-inline: auto; }
-    .panel h2 { font-size: 16px; color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-    
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 13px; color: #A0A0A8; margin-bottom: 4px; }
-    .form-group input, .form-group select { width: 100%; padding: 10px; background: #24242A; border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
-    
-    .row { display: flex; gap: 10px; }
-    .row .form-group { flex: 1; }
-    
-    .btn { background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; font-size: 14px; }
-    .btn:hover { background: #BF161E; }
-    .btn-secondary { background: #2C2C32; border: 1px solid var(--gold); color: var(--gold); margin-bottom: 10px; }
-    .btn-secondary:hover { background: var(--gold); color: #121214; }
-    
-    .item-row { display: flex; justify-content: space-between; align-items: center; background: #24242A; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; }
-    .del-btn { background: #E74C3C; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
-    .del-btn:hover { background: #c0392b; }
-    .item-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; margin-inline-end: 10px; vertical-align: middle; }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body.en {
+      font-family: 'Outfit', sans-serif;
+      direction: ltr;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 50px;
+    }
+
+    header {
+      background: linear-gradient(180deg, var(--dark-red) 0%, rgba(18, 18, 20, 0.95) 100%);
+      padding: 24px 16px 16px;
+      text-align: center;
+      border-bottom: 1px solid rgba(221, 170, 56, 0.25);
+    }
+
+    .top-controls {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .lang-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .logo-container {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(135deg, var(--accent-gold), transparent, var(--accent-gold));
+      box-shadow: 0 4px 20px rgba(163, 18, 25, 0.4);
+      overflow: hidden;
+    }
+
+    .logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .club-title {
+      font-size: 21px;
+      font-weight: 800;
+      color: var(--gold-light);
+      margin-bottom: 4px;
+    }
+
+    .sub-title {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .pricing-toggle-wrapper {
+      margin: 18px auto 6px;
+      max-width: 320px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--card-border);
+      border-radius: 30px;
+      padding: 4px;
+      display: flex;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      text-align: center;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 25px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .toggle-btn.active {
+      background: var(--primary-red);
+      color: #fff;
+    }
+
+    .toggle-btn.member.active {
+      background: linear-gradient(135deg, #B8860B, var(--accent-gold));
+      color: #121214;
+    }
+
+    .search-box-container {
+      padding: 12px 16px 4px;
+    }
+
+    .search-bar {
+      position: relative;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .search-bar input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 11px 40px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search-bar i {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    body:not(.en) .search-bar i { right: 14px; }
+    body.en .search-bar i { left: 14px; }
+
+    .categories-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      background: rgba(18, 18, 20, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      border-bottom: 1px solid var(--card-border);
+      scrollbar-width: none;
+    }
+    .categories-bar::-webkit-scrollbar { display: none; }
+
+    .category-chip {
+      white-space: nowrap;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .category-chip.active {
+      background: var(--primary-red);
+      color: #fff;
+      border-color: var(--accent-gold);
+    }
+
+    .menu-container {
+      padding: 16px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .category-section {
+      margin-bottom: 26px;
+      scroll-margin-top: 70px;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--accent-gold);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px dashed rgba(221, 170, 56, 0.3);
+      padding-bottom: 6px;
+    }
+
+    .items-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .item-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(221, 170, 56, 0.4);
+    }
+
+    .item-img {
+      width: 65px;
+      height: 65px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid var(--card-border);
+      flex-shrink: 0;
+    }
+
+    .item-details {
+      flex: 1;
+    }
+
+    .item-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 2px;
+    }
+
+    .item-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .member-badge {
+      display: inline-block;
+      font-size: 10px;
+      background: rgba(221, 170, 56, 0.15);
+      color: var(--accent-gold);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+
+    .price-container {
+      text-align: end;
+      min-width: 75px;
+    }
+
+    .price-value {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--accent-gold);
+    }
+
+    .currency {
+      font-size: 11px;
+    }
+
+    .price-type-label {
+      display: block;
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--card-border);
+    }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>لوحة إدارة منيو نادي الجلاء</h1>
-    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إضافة أقسام، وتعديل الأصناف والأسعار في السحابة</p>
-  </div>
-
-  <!-- زر التهيئة في حال كانت قاعدة البيانات فارغة -->
-  <div class="panel">
-    <button class="btn btn-secondary" onclick="restoreInitialData()"><i class="fa-solid fa-cloud-arrow-up"></i> رفع وتثبيت قائمة الطعام الافتراضية كاملة إلى السيرفر</button>
-  </div>
-
-  <!-- قسم إضافة تصنيف جديد -->
-  <div class="panel">
-    <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد (Category)</h2>
-    <div class="row">
-      <div class="form-group">
-        <label>اسم القسم بالعربي</label>
-        <input type="text" id="cat-name-ar" placeholder="مثال: مشويات">
-      </div>
-      <div class="form-group">
-        <label>اسم القسم بالإنجليزي</label>
-        <input type="text" id="cat-name-en" placeholder="e.g. Grills">
-      </div>
-    </div>
-    <button class="btn" onclick="addCategory()"><i class="fa-solid fa-plus"></i> إضافة القسم</button>
-  </div>
-
-  <!-- قسم إضافة صنف جديد -->
-  <div class="panel">
-    <h2><i class="fa-solid fa-plus-circle"></i> إضافة صنف جديد للمنيو</h2>
-    
-    <div class="form-group">
-      <label>اختر القسم</label>
-      <select id="item-cat"></select>
+  <header>
+    <div class="top-controls">
+      <button class="lang-btn" onclick="toggleLanguage()">
+        <i class="fa-solid fa-globe"></i>
+        <span id="lang-label">English</span>
+      </button>
     </div>
 
-    <div class="row">
-      <div class="form-group">
-        <label>اسم الصنف (بالعربي)</label>
-        <input type="text" id="name-ar" placeholder="مثال: كباب مشوي">
-      </div>
-      <div class="form-group">
-        <label>Item Name (English)</label>
-        <input type="text" id="name-en" placeholder="e.g. Grilled Kebab">
-      </div>
+    <div class="logo-container">
+      <img src="435341.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/90/A31219/FFFFFF?text=Galaa'">
     </div>
 
-    <div class="form-group">
-      <label>رابط صورة الوجبة (اختياري)</label>
-      <input type="text" id="item-img" placeholder="https://example.com/photo.jpg">
-    </div>
+    <h1 class="club-title" id="txt-title">نادي وفنادق القوات المسلحة</h1>
+    <p class="sub-title" id="txt-sub">قائمة الأطعمة والمشروبات | نادي الجلاء</p>
 
-    <div class="row">
-      <div class="form-group">
-        <label>سعر العضوية (ج.م)</label>
-        <input type="number" id="member-price" placeholder="40">
-      </div>
-      <div class="form-group">
-        <label>سعر الزائر (ج.م)</label>
-        <input type="number" id="guest-price" placeholder="50">
-      </div>
+    <div class="pricing-toggle-wrapper">
+      <button class="toggle-btn member active" id="btn-member" onclick="setPriceMode('member')">
+        <i class="fa-solid fa-id-card"></i>
+        <span id="txt-member-btn">حاملي العضوية</span>
+      </button>
+      <button class="toggle-btn" id="btn-guest" onclick="setPriceMode('guest')">
+        <i class="fa-solid fa-user"></i>
+        <span id="txt-guest-btn">الزائرين</span>
+      </button>
     </div>
+  </header>
 
-    <button class="btn" id="save-btn" onclick="addItem()"><i class="fa-solid fa-check"></i> حفظ الصنف في المنيو</button>
+  <div class="search-box-container">
+    <div class="search-bar">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="search-input" placeholder="ابحث عن صنف أو طبق..." oninput="handleSearch()">
+    </div>
   </div>
 
-  <div class="panel">
-    <h2><i class="fa-solid fa-list-check"></i> الأصناف الحالية</h2>
-    <div id="items-list">جاري تحميل البيانات...</div>
-  </div>
+  <div class="categories-bar" id="categories-bar"></div>
+  <main class="menu-container" id="menu-container"></main>
+
+  <footer>
+    <p id="txt-footer">نادي الجلاء للقوات المسلحة &copy; 2026</p>
+  </footer>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -129,7 +371,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const defaultInitial = [
+    const initialBackupData = [
       {
         id: "salads",
         name_ar: "السلطات",
@@ -184,129 +426,163 @@
           { name_ar: "أرز بالخلطة", name_en: "Egyptian Khaltah Rice", desc_ar: "أرز مصري مكرمل بالبهار", desc_en: "Caramelized oriental rice", member_price: 40, guest_price: 55, img: "" },
           { name_ar: "أرز سادة", name_en: "Plain White Rice", desc_ar: "أرز مصري أبيض بالسمن", desc_en: "Steamed Egyptian rice", member_price: 25, guest_price: 35, img: "" },
           { name_ar: "أرز شعرية", name_en: "Vermicelli Rice", desc_ar: "أرز مصري بالشعرية المحمرة", desc_en: "Rice with toasted vermicelli", member_price: 30, guest_price: 40, img: "" },
-          { name_ar: "مكرونة وايت صوص فراخ ومشروم", name_en: "Chicken Mushroom Alfredo", desc_ar: "مكرونة بصوص الكريمة والدجاج", desc_en: "Creamy chicken mushroom pasta", member_price: 75, guest_price: 95, img: "" }
+          { name_ar: "مكرونة وايت صصوص فراخ ومشروم", name_en: "Chicken Mushroom Alfredo", desc_ar: "مكرونة بصوص الكريمة والدجاج", desc_en: "Creamy chicken mushroom pasta", member_price: 75, guest_price: 95, img: "" }
         ]
       }
     ];
 
-    let currentMenuData = [];
+    let menuData = initialBackupData;
+    let currentLang = 'ar';
+    let currentPricingMode = 'member';
+    let currentFilter = '';
 
+    const translations = {
+      ar: {
+        langBtn: "English",
+        title: "نادي وفنادق القوات المسلحة",
+        sub: "قائمة الأطعمة والمشروبات | نادي الجلاء",
+        memberBtn: "حاملي العضوية",
+        guestBtn: "الزائرين",
+        searchPlaceholder: "ابحث عن صنف أو طبق...",
+        currency: "ج.م",
+        memberPriceLabel: "سعر العضوية",
+        guestPriceLabel: "سعر الزائر",
+        footer: "نادي الجلاء للقوات المسلحة © 2026"
+      },
+      en: {
+        langBtn: "العربية",
+        title: "Armed Forces Clubs & Hotels",
+        sub: "Food & Beverage Menu | Al-Galaa Club",
+        memberBtn: "Club Members",
+        guestBtn: "Visitors / Guests",
+        searchPlaceholder: "Search for dishes...",
+        currency: "EGP",
+        memberPriceLabel: "Member Price",
+        guestPriceLabel: "Visitor Price",
+        footer: "Al-Galaa Armed Forces Club © 2026"
+      }
+    };
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      document.body.className = currentLang === 'en' ? 'en' : '';
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+      
+      const t = translations[currentLang];
+      document.getElementById('lang-label').innerText = t.langBtn;
+      document.getElementById('txt-title').innerText = t.title;
+      document.getElementById('txt-sub').innerText = t.sub;
+      document.getElementById('txt-member-btn').innerText = t.memberBtn;
+      document.getElementById('txt-guest-btn').innerText = t.guestBtn;
+      document.getElementById('search-input').placeholder = t.searchPlaceholder;
+      document.getElementById('txt-footer').innerText = t.footer;
+
+      renderCategories();
+      renderMenu();
+    }
+
+    function setPriceMode(mode) {
+      currentPricingMode = mode;
+      document.getElementById('btn-member').classList.toggle('active', mode === 'member');
+      document.getElementById('btn-guest').classList.toggle('active', mode === 'guest');
+      renderMenu();
+    }
+
+    function renderCategories() {
+      const bar = document.getElementById('categories-bar');
+      bar.innerHTML = '';
+      menuData.forEach((cat, index) => {
+        const chip = document.createElement('button');
+        chip.className = `category-chip ${index === 0 ? 'active' : ''}`;
+        chip.innerHTML = `<i class="fa-solid ${cat.icon || 'fa-utensils'}"></i> ${currentLang === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)}`;
+        chip.onclick = () => {
+          document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          const target = document.getElementById(`cat-${cat.id}`);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+        };
+        bar.appendChild(chip);
+      });
+    }
+
+    function renderMenu() {
+      const container = document.getElementById('menu-container');
+      const t = translations[currentLang];
+      container.innerHTML = '';
+
+      menuData.forEach(cat => {
+        const filteredItems = (cat.items || []).filter(item => {
+          const name = currentLang === 'ar' ? item.name_ar : (item.name_en || item.name_ar);
+          const desc = currentLang === 'ar' ? (item.desc_ar || '') : (item.desc_en || '');
+          return name.toLowerCase().includes(currentFilter.toLowerCase()) || 
+                 desc.toLowerCase().includes(currentFilter.toLowerCase());
+        });
+
+        if (filteredItems.length === 0) return;
+
+        const section = document.createElement('section');
+        section.className = 'category-section';
+        section.id = `cat-${cat.id}`;
+
+        const title = document.createElement('h2');
+        title.className = 'section-title';
+        title.innerHTML = `<i class="fa-solid ${cat.icon || 'fa-utensils'}"></i> ${currentLang === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)}`;
+        section.appendChild(title);
+
+        const grid = document.createElement('div');
+        grid.className = 'items-grid';
+
+        filteredItems.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'item-card';
+
+          const price = currentPricingMode === 'member' ? item.member_price : item.guest_price;
+          const priceLabel = currentPricingMode === 'member' ? t.memberPriceLabel : t.guestPriceLabel;
+          const imgSrc = item.img && item.img.trim() !== '' ? item.img : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120&auto=format&fit=crop&q=60';
+
+          card.innerHTML = `
+            <img src="${imgSrc}" class="item-img" alt="${item.name_ar}" onerror="this.src='https://via.placeholder.com/65/24242A/FFFFFF?text=Dish'">
+            <div class="item-details">
+              <div class="item-name">${currentLang === 'ar' ? item.name_ar : (item.name_en || item.name_ar)}</div>
+              <div class="item-desc">${currentLang === 'ar' ? (item.desc_ar || '') : (item.desc_en || '')}</div>
+              ${currentPricingMode === 'member' ? `<span class="member-badge"><i class="fa-solid fa-id-badge"></i> عضوية</span>` : ''}
+            </div>
+            <div class="price-container">
+              <div class="price-value">${price} <span class="currency">${t.currency}</span></div>
+              <span class="price-type-label">${priceLabel}</span>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        section.appendChild(grid);
+        container.appendChild(section);
+      });
+    }
+
+    function handleSearch() {
+      currentFilter = document.getElementById('search-input').value.trim();
+      renderMenu();
+    }
+
+    // مزامنة Firestore مع النسخة الاحتياطية المباشرة
     db.collection("menu").doc("categories").onSnapshot((doc) => {
       if (doc.exists && doc.data().list && doc.data().list.length > 0) {
-        currentMenuData = doc.data().list;
+        menuData = doc.data().list;
       } else {
-        currentMenuData = defaultInitial;
+        menuData = initialBackupData;
       }
-      populateCategoriesDropdown();
-      renderAdminItems();
+      renderCategories();
+      renderMenu();
+    }, () => {
+      menuData = initialBackupData;
+      renderCategories();
+      renderMenu();
     });
 
-    function populateCategoriesDropdown() {
-      const select = document.getElementById('item-cat');
-      select.innerHTML = '';
-      currentMenuData.forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat.id;
-        opt.innerText = `${cat.name_ar} (${cat.name_en || ''})`;
-        select.appendChild(opt);
-      });
-    }
-
-    function renderAdminItems() {
-      const list = document.getElementById('items-list');
-      list.innerHTML = '';
-
-      currentMenuData.forEach((cat, catIdx) => {
-        (cat.items || []).forEach((item, itemIdx) => {
-          const row = document.createElement('div');
-          row.className = 'item-row';
-          const thumb = item.img ? `<img src="${item.img}" class="item-thumb" onerror="this.style.display='none'">` : '';
-          row.innerHTML = `
-            <div>
-              ${thumb}
-              <strong>${item.name_ar}</strong> - <span style="color:#aaa;">${item.name_en || ''}</span> (${cat.name_ar})<br>
-              <span style="font-size: 11px; color: var(--gold);">عضو: ${item.member_price} ج.م | زائر: ${item.guest_price} ج.م</span>
-            </div>
-            <button class="del-btn" onclick="deleteItem(${catIdx}, ${itemIdx})"><i class="fa-solid fa-trash"></i></button>
-          `;
-          list.appendChild(row);
-        });
-      });
-    }
-
-    function addCategory() {
-      const nameAr = document.getElementById('cat-name-ar').value.trim();
-      const nameEn = document.getElementById('cat-name-en').value.trim();
-      if(!nameAr) {
-        alert("يرجى إدخال اسم القسم بالعربي");
-        return;
-      }
-      const newCat = {
-        id: "cat_" + Date.now(),
-        name_ar: nameAr,
-        name_en: nameEn || nameAr,
-        icon: "fa-utensils",
-        items: []
-      };
-      currentMenuData.push(newCat);
-      db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
-        document.getElementById('cat-name-ar').value = '';
-        document.getElementById('cat-name-en').value = '';
-        alert("تمت إضافة القسم الجديد بنجاح!");
-      });
-    }
-
-    function addItem() {
-      const catId = document.getElementById('item-cat').value;
-      const nameAr = document.getElementById('name-ar').value.trim();
-      const nameEn = document.getElementById('name-en').value.trim();
-      const img = document.getElementById('item-img').value.trim();
-      const mPrice = parseFloat(document.getElementById('member-price').value);
-      const gPrice = parseFloat(document.getElementById('guest-price').value);
-
-      if (!nameAr || isNaN(mPrice) || isNaN(gPrice)) {
-        alert("يرجى ملء الاسم والأسعار المطلوبة");
-        return;
-      }
-
-      const targetCat = currentMenuData.find(c => c.id === catId);
-      if (targetCat) {
-        if (!targetCat.items) targetCat.items = [];
-        targetCat.items.unshift({
-          name_ar: nameAr,
-          name_en: nameEn || nameAr,
-          desc_ar: "",
-          desc_en: "",
-          img: img,
-          member_price: mPrice,
-          guest_price: gPrice
-        });
-
-        db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
-          document.getElementById('name-ar').value = '';
-          document.getElementById('name-en').value = '';
-          document.getElementById('item-img').value = '';
-          document.getElementById('member-price').value = '';
-          document.getElementById('guest-price').value = '';
-          alert("تم حفظ الصنف بنجاح!");
-        });
-      }
-    }
-
-    function deleteItem(catIdx, itemIdx) {
-      if (confirm("هل تريد حذف هذا الصنف؟")) {
-        currentMenuData[catIdx].items.splice(itemIdx, 1);
-        db.collection("menu").doc("categories").set({ list: currentMenuData });
-      }
-    }
-
-    function restoreInitialData() {
-      if (confirm("هل تريد رفع القائمة الكاملة الافتراضية إلى السيرفر الآن؟")) {
-        db.collection("menu").doc("categories").set({ list: defaultInitial }).then(() => {
-          alert("تم حفظ البيانات في السيرفر بنجاح!");
-        });
-      }
-    }
+    renderCategories();
+    renderMenu();
   </script>
 </body>
 </html>
