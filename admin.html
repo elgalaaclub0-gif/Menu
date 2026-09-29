@@ -13,6 +13,7 @@
       --bg: #121214;
       --card: #1B1B1F;
       --border: #2C2C32;
+      --blue: #2980B9;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
     body { background: var(--bg); color: #fff; padding: 20px 15px; }
@@ -43,15 +44,8 @@
       color: var(--gold);
       margin-bottom: 15px;
     }
-    .login-box h2 {
-      font-size: 20px;
-      margin-bottom: 8px;
-    }
-    .login-box p {
-      color: #A0A0A8;
-      font-size: 13px;
-      margin-bottom: 20px;
-    }
+    .login-box h2 { font-size: 20px; margin-bottom: 8px; }
+    .login-box p { color: #A0A0A8; font-size: 13px; margin-bottom: 20px; }
     .login-box input {
       width: 100%;
       padding: 12px;
@@ -64,20 +58,11 @@
       outline: none;
       text-align: center;
     }
-    .login-box input:focus {
-      border-color: var(--gold);
-    }
-    .login-error {
-      color: #E74C3C;
-      font-size: 13px;
-      margin-bottom: 10px;
-      display: none;
-    }
+    .login-box input:focus { border-color: var(--gold); }
+    .login-error { color: #E74C3C; font-size: 13px; margin-bottom: 10px; display: none; }
 
     /* لوحة التحكم الرئيسية */
-    #admin-content {
-      display: none;
-    }
+    #admin-content { display: none; }
     .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; position: relative; }
     .header h1 { color: var(--gold); font-size: 22px; }
     .logout-btn {
@@ -92,10 +77,7 @@
       font-size: 12px;
       cursor: pointer;
     }
-    .logout-btn:hover {
-      color: #fff;
-      border-color: #E74C3C;
-    }
+    .logout-btn:hover { color: #fff; border-color: #E74C3C; }
     
     .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; max-width: 650px; margin-inline: auto; }
     .panel h2 { font-size: 16px; color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
@@ -113,15 +95,41 @@
     .btn-secondary:hover { background: var(--gold); color: #121214; }
     
     .item-row { display: flex; justify-content: space-between; align-items: center; background: #24242A; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; }
+    .actions-box { display: flex; gap: 6px; }
     .del-btn { background: #E74C3C; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
     .del-btn:hover { background: #c0392b; }
+    .edit-btn { background: var(--blue); color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+    .edit-btn:hover { background: #1f618d; }
     .item-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; margin-inline-end: 10px; vertical-align: middle; }
     .cat-count { font-size: 11px; background: rgba(221, 170, 56, 0.2); color: var(--gold); padding: 2px 8px; border-radius: 12px; margin-inline-start: 8px; }
+
+    /* نافذة التعديل المنبثقة (Edit Modal) */
+    #edit-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      padding: 15px;
+    }
+    .modal-content {
+      background: var(--card);
+      border: 1px solid var(--blue);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 500px;
+      width: 100%;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .modal-header h3 { color: var(--gold); font-size: 16px; }
+    .close-modal { background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <!-- شاشة الدخول المقفولة بكلمة سر -->
+  <!-- شاشة الدخول -->
   <div id="login-overlay">
     <div class="login-box">
       <i class="fa-solid fa-shield-halved lock-icon"></i>
@@ -133,7 +141,7 @@
     </div>
   </div>
 
-  <!-- محتوى لوحة التحكم الفعلي -->
+  <!-- محتوى لوحة التحكم -->
   <div id="admin-content">
     <div class="header">
       <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
@@ -146,7 +154,7 @@
       <button class="btn btn-secondary" onclick="restoreInitialData()"><i class="fa-solid fa-cloud-arrow-up"></i> رفع وتثبيت قائمة الطعام الافتراضية كاملة إلى السيرفر</button>
     </div>
 
-    <!-- إدارة وحذف الأقسام الحالية -->
+    <!-- إدارة وحذف الأقسام -->
     <div class="panel">
       <h2><i class="fa-solid fa-layer-group"></i> الأقسام الحالية وحذفها</h2>
       <div id="categories-list">جاري تحميل الأقسام...</div>
@@ -207,10 +215,51 @@
       <button class="btn" id="save-btn" onclick="addItem()"><i class="fa-solid fa-check"></i> حفظ الصنف في المنيو</button>
     </div>
 
-    <!-- عرض وحذف الأصناف -->
+    <!-- عرض، تعديل، وحذف الأصناف -->
     <div class="panel">
-      <h2><i class="fa-solid fa-list-check"></i> الأصناف الحالية</h2>
+      <h2><i class="fa-solid fa-list-check"></i> الأصناف الحالية (تعديل وحذف)</h2>
       <div id="items-list">جاري تحميل البيانات...</div>
+    </div>
+  </div>
+
+  <!-- نافذة تعديل الصنف -->
+  <div id="edit-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-pen-to-square"></i> تعديل بيانات الصنف</h3>
+        <button class="close-modal" onclick="closeEditModal()">&times;</button>
+      </div>
+      <input type="hidden" id="edit-cat-idx">
+      <input type="hidden" id="edit-item-idx">
+
+      <div class="row">
+        <div class="form-group">
+          <label>اسم الصنف (بالعربي)</label>
+          <input type="text" id="edit-name-ar">
+        </div>
+        <div class="form-group">
+          <label>Item Name (English)</label>
+          <input type="text" id="edit-name-en">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>رابط الصورة (اختياري)</label>
+        <input type="text" id="edit-img">
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>سعر العضوية (ج.م)</label>
+          <input type="number" id="edit-member-price">
+        </div>
+        <div class="form-group">
+          <label>سعر الزائر (ج.م)</label>
+          <input type="number" id="edit-guest-price">
+        </div>
+      </div>
+
+      <button class="btn" style="background:var(--blue);" onclick="saveEditItem()"><i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات</button>
     </div>
   </div>
 
@@ -221,7 +270,7 @@
     const ADMIN_PASSWORD = "Galaa@2026"; 
 
     function checkPassword() {
-      const pass = document.getElementById('admin-pass').value;
+      const pass = document.getElementById('admin-pass').value.trim();
       if (pass === ADMIN_PASSWORD) {
         sessionStorage.setItem('isGalaaAdmin', 'true');
         unlockAdmin();
@@ -241,11 +290,11 @@
       location.reload();
     }
 
-    window.onload = function() {
+    window.addEventListener('DOMContentLoaded', () => {
       if (sessionStorage.getItem('isGalaaAdmin') === 'true') {
         unlockAdmin();
       }
-    };
+    });
 
     let db;
     let currentMenuData = [];
@@ -337,7 +386,6 @@
       });
     }
 
-    // عرض وإدارة الأقسام الحالية مع زر الحذف المباشر
     function renderCategoriesManager() {
       const catList = document.getElementById('categories-list');
       catList.innerHTML = '';
@@ -397,7 +445,10 @@
               <strong>${item.name_ar}</strong> - <span style="color:#aaa;">${item.name_en || ''}</span> (${cat.name_ar})<br>
               <span style="font-size: 11px; color: var(--gold);">عضو: ${item.member_price} ج.م | زائر: ${item.guest_price} ج.م</span>
             </div>
-            <button class="del-btn" onclick="deleteItem(${catIdx}, ${itemIdx})"><i class="fa-solid fa-trash"></i></button>
+            <div class="actions-box">
+              <button class="edit-btn" onclick="openEditModal(${catIdx}, ${itemIdx})"><i class="fa-solid fa-pen"></i> تعديل</button>
+              <button class="del-btn" onclick="deleteItem(${catIdx}, ${itemIdx})"><i class="fa-solid fa-trash"></i> حذف</button>
+            </div>
           `;
           list.appendChild(row);
         });
@@ -459,3 +510,69 @@
           document.getElementById('member-price').value = '';
           document.getElementById('guest-price').value = '';
           alert("تم حفظ الصنف بنجاح!");
+        });
+      }
+    }
+
+    /* دوال التعديل على الصنف */
+    function openEditModal(catIdx, itemIdx) {
+      const item = currentMenuData[catIdx].items[itemIdx];
+      document.getElementById('edit-cat-idx').value = catIdx;
+      document.getElementById('edit-item-idx').value = itemIdx;
+      document.getElementById('edit-name-ar').value = item.name_ar || '';
+      document.getElementById('edit-name-en').value = item.name_en || '';
+      document.getElementById('edit-img').value = item.img || '';
+      document.getElementById('edit-member-price').value = item.member_price;
+      document.getElementById('edit-guest-price').value = item.guest_price;
+      document.getElementById('edit-modal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').style.display = 'none';
+    }
+
+    function saveEditItem() {
+      const catIdx = document.getElementById('edit-cat-idx').value;
+      const itemIdx = document.getElementById('edit-item-idx').value;
+      const nameAr = document.getElementById('edit-name-ar').value.trim();
+      const nameEn = document.getElementById('edit-name-en').value.trim();
+      const img = document.getElementById('edit-img').value.trim();
+      const mPrice = parseFloat(document.getElementById('edit-member-price').value);
+      const gPrice = parseFloat(document.getElementById('edit-guest-price').value);
+
+      if (!nameAr || isNaN(mPrice) || isNaN(gPrice)) {
+        alert("يرجى ملء الاسم والأسعار المطلوبة بشكل صحيح");
+        return;
+      }
+
+      currentMenuData[catIdx].items[itemIdx].name_ar = nameAr;
+      currentMenuData[catIdx].items[itemIdx].name_en = nameEn || nameAr;
+      currentMenuData[catIdx].items[itemIdx].img = img;
+      currentMenuData[catIdx].items[itemIdx].member_price = mPrice;
+      currentMenuData[catIdx].items[itemIdx].guest_price = gPrice;
+
+      db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
+        closeEditModal();
+        alert("تم تحديث الصنف بنجاح!");
+      }).catch(err => {
+        alert("خطأ أثناء الحفظ: " + err.message);
+      });
+    }
+
+    function deleteItem(catIdx, itemIdx) {
+      if (confirm("هل تريد حذف هذا الصنف؟")) {
+        currentMenuData[catIdx].items.splice(itemIdx, 1);
+        db.collection("menu").doc("categories").set({ list: currentMenuData });
+      }
+    }
+
+    function restoreInitialData() {
+      if (confirm("هل تريد رفع القائمة الكاملة الافتراضية إلى السيرفر الآن؟")) {
+        db.collection("menu").doc("categories").set({ list: defaultInitial }).then(() => {
+          alert("تم حفظ البيانات في السيرفر بنجاح!");
+        });
+      }
+    }
+  </script>
+</body>
+</html>
