@@ -16,8 +16,86 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
     body { background: var(--bg); color: #fff; padding: 20px 15px; }
-    .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+
+    /* شاشة تسجيل الدخول */
+    #login-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+    .login-box {
+      background: var(--card);
+      border: 1px solid var(--gold);
+      border-radius: 14px;
+      padding: 30px 24px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    }
+    .login-box i.lock-icon {
+      font-size: 40px;
+      color: var(--gold);
+      margin-bottom: 15px;
+    }
+    .login-box h2 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .login-box p {
+      color: #A0A0A8;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      background: #24242A;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 15px;
+      margin-bottom: 15px;
+      outline: none;
+      text-align: center;
+    }
+    .login-box input:focus {
+      border-color: var(--gold);
+    }
+    .login-error {
+      color: #E74C3C;
+      font-size: 13px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    /* لوحة التحكم الرئيسية */
+    #admin-content {
+      display: none;
+    }
+    .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; position: relative; }
     .header h1 { color: var(--gold); font-size: 22px; }
+    .logout-btn {
+      position: absolute;
+      left: 10px;
+      top: 5px;
+      background: #2C2C32;
+      color: #A0A0A8;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .logout-btn:hover {
+      color: #fff;
+      border-color: #E74C3C;
+    }
     
     .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; max-width: 650px; margin-inline: auto; }
     .panel h2 { font-size: 16px; color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
@@ -42,92 +120,134 @@
 </head>
 <body>
 
-  <div class="header">
-    <h1>لوحة إدارة منيو نادي الجلاء</h1>
-    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إضافة أقسام، وتعديل الأصناف والأسعار في السحابة</p>
+  <!-- شاشة الدخول المقفولة بكلمة سر -->
+  <div id="login-overlay">
+    <div class="login-box">
+      <i class="fa-solid fa-shield-halved lock-icon"></i>
+      <h2>لوحة إدارة منيو نادي الجلاء</h2>
+      <p>أدخل كلمة المرور للمتابعة</p>
+      <input type="password" id="admin-pass" placeholder="كلمة المرور..." onkeydown="if(event.key==='Enter') checkPassword()">
+      <div id="login-err" class="login-error">كلمة المرور غير صحيحة!</div>
+      <button class="btn" onclick="checkPassword()"><i class="fa-solid fa-lock-open"></i> تسجيل الدخول</button>
+    </div>
   </div>
 
-  <!-- زر التهيئة في حال كانت قاعدة البيانات فارغة -->
-  <div class="panel">
-    <button class="btn btn-secondary" onclick="restoreInitialData()"><i class="fa-solid fa-cloud-arrow-up"></i> رفع وتثبيت قائمة الطعام الافتراضية كاملة إلى السيرفر</button>
-  </div>
-
-  <!-- قسم إضافة تصنيف جديد -->
-  <div class="panel">
-    <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد (Category)</h2>
-    <div class="row">
-      <div class="form-group">
-        <label>اسم القسم بالعربي</label>
-        <input type="text" id="cat-name-ar" placeholder="مثال: مشويات">
-      </div>
-      <div class="form-group">
-        <label>اسم القسم بالإنجليزي</label>
-        <input type="text" id="cat-name-en" placeholder="e.g. Grills">
-      </div>
-    </div>
-    <button class="btn" onclick="addCategory()"><i class="fa-solid fa-plus"></i> إضافة القسم</button>
-  </div>
-
-  <!-- قسم إضافة صنف جديد -->
-  <div class="panel">
-    <h2><i class="fa-solid fa-plus-circle"></i> إضافة صنف جديد للمنيو</h2>
-    
-    <div class="form-group">
-      <label>اختر القسم</label>
-      <select id="item-cat"></select>
+  <!-- محتوى لوحة التحكم الفعلي -->
+  <div id="admin-content">
+    <div class="header">
+      <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
+      <h1>لوحة إدارة منيو نادي الجلاء</h1>
+      <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إضافة أقسام، وتعديل الأصناف والأسعار في السحابة</p>
     </div>
 
-    <div class="row">
-      <div class="form-group">
-        <label>اسم الصنف (بالعربي)</label>
-        <input type="text" id="name-ar" placeholder="مثال: كباب مشوي">
-      </div>
-      <div class="form-group">
-        <label>Item Name (English)</label>
-        <input type="text" id="name-en" placeholder="e.g. Grilled Kebab">
-      </div>
+    <!-- زر إعادة تعيين القائمة إذا دعت الحاجة -->
+    <div class="panel">
+      <button class="btn btn-secondary" onclick="restoreInitialData()"><i class="fa-solid fa-cloud-arrow-up"></i> رفع وتثبيت قائمة الطعام الافتراضية كاملة إلى السيرفر</button>
     </div>
 
-    <div class="form-group">
-      <label>رابط صورة الوجبة (اختياري)</label>
-      <input type="text" id="item-img" placeholder="https://example.com/photo.jpg">
+    <!-- قسم إضافة تصنيف جديد -->
+    <div class="panel">
+      <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد (Category)</h2>
+      <div class="row">
+        <div class="form-group">
+          <label>اسم القسم بالعربي</label>
+          <input type="text" id="cat-name-ar" placeholder="مثال: مشويات">
+        </div>
+        <div class="form-group">
+          <label>اسم القسم بالإنجليزي</label>
+          <input type="text" id="cat-name-en" placeholder="e.g. Grills">
+        </div>
+      </div>
+      <button class="btn" onclick="addCategory()"><i class="fa-solid fa-plus"></i> إضافة القسم</button>
     </div>
 
-    <div class="row">
+    <!-- قسم إضافة صنف جديد -->
+    <div class="panel">
+      <h2><i class="fa-solid fa-plus-circle"></i> إضافة صنف جديد للمنيو</h2>
+      
       <div class="form-group">
-        <label>سعر العضوية (ج.م)</label>
-        <input type="number" id="member-price" placeholder="40">
+        <label>اختر القسم</label>
+        <select id="item-cat"></select>
       </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>اسم الصنف (بالعربي)</label>
+          <input type="text" id="name-ar" placeholder="مثال: كباب مشوي">
+        </div>
+        <div class="form-group">
+          <label>Item Name (English)</label>
+          <input type="text" id="name-en" placeholder="e.g. Grilled Kebab">
+        </div>
+      </div>
+
       <div class="form-group">
-        <label>سعر الزائر (ج.م)</label>
-        <input type="number" id="guest-price" placeholder="50">
+        <label>رابط صورة الوجبة (اختياري)</label>
+        <input type="text" id="item-img" placeholder="https://example.com/photo.jpg">
       </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>سعر العضوية (ج.م)</label>
+          <input type="number" id="member-price" placeholder="40">
+        </div>
+        <div class="form-group">
+          <label>سعر الزائر (ج.م)</label>
+          <input type="number" id="guest-price" placeholder="50">
+        </div>
+      </div>
+
+      <button class="btn" id="save-btn" onclick="addItem()"><i class="fa-solid fa-check"></i> حفظ الصنف في المنيو</button>
     </div>
 
-    <button class="btn" id="save-btn" onclick="addItem()"><i class="fa-solid fa-check"></i> حفظ الصنف في المنيو</button>
-  </div>
-
-  <div class="panel">
-    <h2><i class="fa-solid fa-list-check"></i> الأصناف الحالية</h2>
-    <div id="items-list">جاري تحميل البيانات...</div>
+    <div class="panel">
+      <h2><i class="fa-solid fa-list-check"></i> الأصناف الحالية</h2>
+      <div id="items-list">جاري تحميل البيانات...</div>
+    </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyALAk-3SXOw7kmrwKrGp5cp9o77Nxf9Ufo",
-      authDomain: "galaa-menu.firebaseapp.com",
-      projectId: "galaa-menu",
-      storageBucket: "galaa-menu.firebasestorage.app",
-      messagingSenderId: "853813647144",
-      appId: "1:853813647144:web:f7bf868ce7af3bd4dda21d",
-      measurementId: "G-BH18Y6JBGW"
+    // ==========================================
+    // ضبط كلمة المرور (تقدر تغيرها من هنا)
+    // ==========================================
+    const ADMIN_PASSWORD = "Galaa@2026"; 
+
+    function checkPassword() {
+      const pass = document.getElementById('admin-pass').value;
+      if (pass === ADMIN_PASSWORD) {
+        sessionStorage.setItem('isGalaaAdmin', 'true');
+        unlockAdmin();
+      } else {
+        document.getElementById('login-err').style.display = 'block';
+      }
+    }
+
+    function unlockAdmin() {
+      document.getElementById('login-overlay').style.display = 'none';
+      document.getElementById('admin-content').style.display = 'block';
+      initFirebase();
+    }
+
+    function logout() {
+      sessionStorage.removeItem('isGalaaAdmin');
+      location.reload();
+    }
+
+    // فحص إذا كان مسجل دخول مسبقاً
+    window.onload = function() {
+      if (sessionStorage.getItem('isGalaaAdmin') === 'true') {
+        unlockAdmin();
+      }
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    // ==========================================
+    // كود Firebase وإدارة البيانات
+    // ==========================================
+    let db;
+    let currentMenuData = [];
 
     const defaultInitial = [
       {
@@ -154,7 +274,7 @@
           { name_ar: "شوربة خضار", name_en: "Vegetable Soup", desc_ar: "خضار مشكل طازج", desc_en: "Fresh mixed vegetable soup", member_price: 35, guest_price: 45, img: "" },
           { name_ar: "شوربة لسان عصفور", name_en: "Orzo Soup", desc_ar: "شوربة لسان عصفور بمرق دافئ", desc_en: "Traditional orzo pasta broth", member_price: 30, guest_price: 40, img: "" },
           { name_ar: "شوربة شعرية", name_en: "Vermicelli Soup", desc_ar: "شعرية محمرة بالمرقة", desc_en: "Toasted vermicelli soup", member_price: 30, guest_price: 40, img: "" },
-          { name_ar: "شوربة فراخ بالكريمة", name_en: "Cream of Chicken Soup", desc_ar: "قطع دجاج مع صوص الكريمة", desc_en: "Velvety chicken cream soup", member_price: 50, guest_price: 65, img: "" }
+          { name_ar: "شوربة فراخ بالكريمة", name_en: "Cream of Chicken Soup", desc_ar: "قطع دجاج مع صصوص الكريمة", desc_en: "Velvety chicken cream soup", member_price: 50, guest_price: 65, img: "" }
         ]
       },
       {
@@ -189,17 +309,31 @@
       }
     ];
 
-    let currentMenuData = [];
-
-    db.collection("menu").doc("categories").onSnapshot((doc) => {
-      if (doc.exists && doc.data().list && doc.data().list.length > 0) {
-        currentMenuData = doc.data().list;
-      } else {
-        currentMenuData = defaultInitial;
+    function initFirebase() {
+      if (!firebase.apps.length) {
+        const firebaseConfig = {
+          apiKey: "AIzaSyALAk-3SXOw7kmrwKrGp5cp9o77Nxf9Ufo",
+          authDomain: "galaa-menu.firebaseapp.com",
+          projectId: "galaa-menu",
+          storageBucket: "galaa-menu.firebasestorage.app",
+          messagingSenderId: "853813647144",
+          appId: "1:853813647144:web:f7bf868ce7af3bd4dda21d",
+          measurementId: "G-BH18Y6JBGW"
+        };
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
       }
-      populateCategoriesDropdown();
-      renderAdminItems();
-    });
+
+      db.collection("menu").doc("categories").onSnapshot((doc) => {
+        if (doc.exists && doc.data().list && doc.data().list.length > 0) {
+          currentMenuData = doc.data().list;
+        } else {
+          currentMenuData = defaultInitial;
+        }
+        populateCategoriesDropdown();
+        renderAdminItems();
+      });
+    }
 
     function populateCategoriesDropdown() {
       const select = document.getElementById('item-cat');
