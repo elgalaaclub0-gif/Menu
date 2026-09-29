@@ -116,6 +116,7 @@
     .del-btn { background: #E74C3C; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
     .del-btn:hover { background: #c0392b; }
     .item-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; margin-inline-end: 10px; vertical-align: middle; }
+    .cat-count { font-size: 11px; background: rgba(221, 170, 56, 0.2); color: var(--gold); padding: 2px 8px; border-radius: 12px; margin-inline-start: 8px; }
   </style>
 </head>
 <body>
@@ -137,12 +138,18 @@
     <div class="header">
       <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
       <h1>لوحة إدارة منيو نادي الجلاء</h1>
-      <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إضافة أقسام، وتعديل الأصناف والأسعار في السحابة</p>
+      <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إضافة أقسام، وحذفها، وتعديل الأصناف والأسعار في السحابة</p>
     </div>
 
-    <!-- زر إعادة تعيين القائمة إذا دعت الحاجة -->
+    <!-- زر إعادة تعيين القائمة -->
     <div class="panel">
       <button class="btn btn-secondary" onclick="restoreInitialData()"><i class="fa-solid fa-cloud-arrow-up"></i> رفع وتثبيت قائمة الطعام الافتراضية كاملة إلى السيرفر</button>
+    </div>
+
+    <!-- إدارة وحذف الأقسام الحالية -->
+    <div class="panel">
+      <h2><i class="fa-solid fa-layer-group"></i> الأقسام الحالية وحذفها</h2>
+      <div id="categories-list">جاري تحميل الأقسام...</div>
     </div>
 
     <!-- قسم إضافة تصنيف جديد -->
@@ -200,6 +207,7 @@
       <button class="btn" id="save-btn" onclick="addItem()"><i class="fa-solid fa-check"></i> حفظ الصنف في المنيو</button>
     </div>
 
+    <!-- عرض وحذف الأصناف -->
     <div class="panel">
       <h2><i class="fa-solid fa-list-check"></i> الأصناف الحالية</h2>
       <div id="items-list">جاري تحميل البيانات...</div>
@@ -210,9 +218,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
-    // ==========================================
-    // ضبط كلمة المرور (تقدر تغيرها من هنا)
-    // ==========================================
     const ADMIN_PASSWORD = "Galaa@2026"; 
 
     function checkPassword() {
@@ -236,16 +241,12 @@
       location.reload();
     }
 
-    // فحص إذا كان مسجل دخول مسبقاً
     window.onload = function() {
       if (sessionStorage.getItem('isGalaaAdmin') === 'true') {
         unlockAdmin();
       }
     };
 
-    // ==========================================
-    // كود Firebase وإدارة البيانات
-    // ==========================================
     let db;
     let currentMenuData = [];
 
@@ -330,9 +331,44 @@
         } else {
           currentMenuData = defaultInitial;
         }
+        renderCategoriesManager();
         populateCategoriesDropdown();
         renderAdminItems();
       });
+    }
+
+    // عرض وإدارة الأقسام الحالية مع زر الحذف المباشر
+    function renderCategoriesManager() {
+      const catList = document.getElementById('categories-list');
+      catList.innerHTML = '';
+
+      if (currentMenuData.length === 0) {
+        catList.innerHTML = '<p style="color:#aaa; font-size:13px;">لا توجد أقسام حالياً.</p>';
+        return;
+      }
+
+      currentMenuData.forEach((cat, index) => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+          <div>
+            <strong>${cat.name_ar}</strong> - <span style="color:#aaa;">${cat.name_en || ''}</span>
+            <span class="cat-count">${(cat.items || []).length} صنف</span>
+          </div>
+          <button class="del-btn" onclick="deleteCategory(${index})" title="حذف القسم بالكامل"><i class="fa-solid fa-trash"></i> حذف القسم</button>
+        `;
+        catList.appendChild(row);
+      });
+    }
+
+    function deleteCategory(catIdx) {
+      const catName = currentMenuData[catIdx].name_ar;
+      if (confirm(`هل أنت متأكد من حذف قسم "${catName}" وجميع الأصناف الموجودة بداخله بالكامل؟`)) {
+        currentMenuData.splice(catIdx, 1);
+        db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
+          alert(`تم حذف قسم "${catName}" بنجاح!`);
+        });
+      }
     }
 
     function populateCategoriesDropdown() {
@@ -423,24 +459,3 @@
           document.getElementById('member-price').value = '';
           document.getElementById('guest-price').value = '';
           alert("تم حفظ الصنف بنجاح!");
-        });
-      }
-    }
-
-    function deleteItem(catIdx, itemIdx) {
-      if (confirm("هل تريد حذف هذا الصنف؟")) {
-        currentMenuData[catIdx].items.splice(itemIdx, 1);
-        db.collection("menu").doc("categories").set({ list: currentMenuData });
-      }
-    }
-
-    function restoreInitialData() {
-      if (confirm("هل تريد رفع القائمة الكاملة الافتراضية إلى السيرفر الآن؟")) {
-        db.collection("menu").doc("categories").set({ list: defaultInitial }).then(() => {
-          alert("تم حفظ البيانات في السيرفر بنجاح!");
-        });
-      }
-    }
-  </script>
-</body>
-</html>
