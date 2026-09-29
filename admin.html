@@ -18,14 +18,18 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
     body { background: var(--bg); color: #fff; padding: 20px 15px; }
 
+    /* شاشة تسجيل الدخول */
     #login-overlay {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       background: var(--bg);
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 9999;
+      z-index: 99999;
       padding: 20px;
     }
     .login-box {
@@ -52,14 +56,15 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       color: #fff;
-      font-size: 15px;
-      margin-bottom: 15px;
+      font-size: 16px;
+      margin-bottom: 12px;
       outline: none;
       text-align: center;
     }
     .login-box input:focus { border-color: var(--gold); }
-    .login-error { color: #E74C3C; font-size: 13px; margin-bottom: 10px; display: none; }
+    .login-error { color: #E74C3C; font-size: 13px; margin-bottom: 12px; display: none; font-weight: bold; }
 
+    /* محتوى لوحة التحكم */
     #admin-content { display: none; }
     .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; position: relative; }
     .header h1 { color: var(--gold); font-size: 22px; }
@@ -109,10 +114,11 @@
     .item-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; margin-inline-end: 10px; vertical-align: middle; }
     .cat-count { font-size: 11px; background: rgba(221, 170, 56, 0.2); color: var(--gold); padding: 2px 8px; border-radius: 12px; margin-inline-start: 8px; }
 
+    /* نافذة التعديل */
     #edit-modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.85);
       display: none;
       justify-content: center;
       align-items: center;
@@ -136,17 +142,19 @@
 </head>
 <body>
 
+  <!-- شاشة الدخول -->
   <div id="login-overlay">
     <div class="login-box">
       <i class="fa-solid fa-shield-halved lock-icon"></i>
       <h2>لوحة إدارة منيو نادي الجلاء</h2>
       <p>أدخل كلمة المرور للمتابعة</p>
-      <input type="password" id="admin-pass" placeholder="كلمة المرور..." onkeydown="if(event.key==='Enter') checkPassword()">
+      <input type="password" id="admin-pass" placeholder="كلمة المرور..." autocomplete="off">
       <div id="login-err" class="login-error">كلمة المرور غير صحيحة!</div>
-      <button class="btn" onclick="checkPassword()"><i class="fa-solid fa-lock-open"></i> تسجيل الدخول</button>
+      <button class="btn" id="login-btn" type="button"><i class="fa-solid fa-lock-open"></i> تسجيل الدخول</button>
     </div>
   </div>
 
+  <!-- محتوى الإدارة -->
   <div id="admin-content">
     <div class="header">
       <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
@@ -198,17 +206,17 @@
 
       <div class="row">
         <div class="form-group">
-          <label>وصف الصنف (بالعربي)</label>
+          <label>وصف الصنف (بالعربي) - اختياري</label>
           <textarea id="desc-ar" placeholder="مثال: كباب ضاني مشوي على الفحم يقدم مع الخضار"></textarea>
         </div>
         <div class="form-group">
-          <label>Description (English)</label>
+          <label>Description (English) - Optional</label>
           <textarea id="desc-en" placeholder="e.g. Charcoal grilled lamb kebab served with vegetables"></textarea>
         </div>
       </div>
 
       <div class="form-group">
-        <label>رابط صورة الوجبة (اختياري)</label>
+        <label>رابط صورة الوجبة (اختياري - اتركه فارغاً إذا لم توجد صورة)</label>
         <input type="text" id="item-img" placeholder="https://example.com/photo.jpg">
       </div>
 
@@ -289,53 +297,69 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
-    const ADMIN_PASSWORD = "Galaa@2026"; 
+    // ===============================================
+    // إعداد كلمة المرور (يمكنك تغييرها من هنا)
+    // ===============================================
+    const ADMIN_PASSWORD = "123456";
 
-    function checkPassword() {
-      const pass = document.getElementById('admin-pass').value.trim();
+    // تهيئة Firebase في الخلفية مباشرة
+    const firebaseConfig = {
+      apiKey: "AIzaSyALAk-3SXOw7kmrwKrGp5cp9o77Nxf9Ufo",
+      authDomain: "galaa-menu.firebaseapp.com",
+      projectId: "galaa-menu",
+      storageBucket: "galaa-menu.firebasestorage.app",
+      messagingSenderId: "853813647144",
+      appId: "1:853813647144:web:f7bf868ce7af3bd4dda21d",
+      measurementId: "G-BH18Y6JBGW"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    let currentMenuData = [];
+
+    // التحقق الفوري من كلمة المرور
+    function verifyPass() {
+      const input = document.getElementById('admin-pass');
+      const err = document.getElementById('login-err');
+      const pass = input.value.trim();
+
       if (pass === ADMIN_PASSWORD) {
-        sessionStorage.setItem('isGalaaAdmin', 'true');
-        unlockAdmin();
+        err.style.display = 'none';
+        sessionStorage.setItem('isGalaaAdminLogged', 'true');
+        showDashboard();
       } else {
-        document.getElementById('login-err').style.display = 'block';
+        err.style.display = 'block';
+        input.value = '';
+        input.focus();
       }
     }
 
-    function unlockAdmin() {
+    function showDashboard() {
       document.getElementById('login-overlay').style.display = 'none';
       document.getElementById('admin-content').style.display = 'block';
-      initFirebase();
+      loadFirebaseData();
     }
 
     function logout() {
-      sessionStorage.removeItem('isGalaaAdmin');
+      sessionStorage.removeItem('isGalaaAdminLogged');
       location.reload();
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      if (sessionStorage.getItem('isGalaaAdmin') === 'true') {
-        unlockAdmin();
+    // ربط الأحداث (Event Listeners)
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('login-btn').addEventListener('click', verifyPass);
+      document.getElementById('admin-pass').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') verifyPass();
+      });
+
+      // التحقق مما إذا كان مسجل دخول بالفعل في نفس الجلسة
+      if (sessionStorage.getItem('isGalaaAdminLogged') === 'true') {
+        showDashboard();
       }
     });
 
-    let db;
-    let currentMenuData = [];
-
-    function initFirebase() {
-      if (!firebase.apps.length) {
-        const firebaseConfig = {
-          apiKey: "AIzaSyALAk-3SXOw7kmrwKrGp5cp9o77Nxf9Ufo",
-          authDomain: "galaa-menu.firebaseapp.com",
-          projectId: "galaa-menu",
-          storageBucket: "galaa-menu.firebasestorage.app",
-          messagingSenderId: "853813647144",
-          appId: "1:853813647144:web:f7bf868ce7af3bd4dda21d",
-          measurementId: "G-BH18Y6JBGW"
-        };
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore();
-      }
-
+    // جلب البيانات من السيرفر
+    function loadFirebaseData() {
       db.collection("menu").doc("categories").onSnapshot((doc) => {
         if (doc.exists && doc.data().list) {
           currentMenuData = doc.data().list;
@@ -353,7 +377,7 @@
       catList.innerHTML = '';
 
       if (currentMenuData.length === 0) {
-        catList.innerHTML = '<p style="color:#aaa; font-size:13px;">لا توجد أقسام حالياً.</p>';
+        catList.innerHTML = '<p style="color:#aaa; font-size:13px;">لا توجد أقسام حالياً. أضف قسماً من النموذج بالأسفل.</p>';
         return;
       }
 
@@ -396,11 +420,16 @@
       const list = document.getElementById('items-list');
       list.innerHTML = '';
 
+      if (currentMenuData.length === 0) {
+        list.innerHTML = '<p style="color:#aaa; font-size:13px;">لا توجد أصناف حالياً.</p>';
+        return;
+      }
+
       currentMenuData.forEach((cat, catIdx) => {
         (cat.items || []).forEach((item, itemIdx) => {
           const row = document.createElement('div');
           row.className = 'item-row';
-          const thumb = item.img ? `<img src="${item.img}" class="item-thumb" onerror="this.style.display='none'">` : '';
+          const thumb = (item.img && item.img.trim() !== '') ? `<img src="${item.img}" class="item-thumb" onerror="this.style.display='none'">` : '';
           row.innerHTML = `
             <div>
               ${thumb}
@@ -501,23 +530,3 @@
 
     function saveEditItem() {
       const catIdx = document.getElementById('edit-cat-idx').value;
-      const itemIdx = document.getElementById('edit-item-idx').value;
-      const nameAr = document.getElementById('edit-name-ar').value.trim();
-      const nameEn = document.getElementById('edit-name-en').value.trim();
-      const descAr = document.getElementById('edit-desc-ar').value.trim();
-      const descEn = document.getElementById('edit-desc-en').value.trim();
-      const img = document.getElementById('edit-img').value.trim();
-      const mPrice = parseFloat(document.getElementById('edit-member-price').value);
-      const gPrice = parseFloat(document.getElementById('edit-guest-price').value);
-
-      if (!nameAr || isNaN(mPrice) || isNaN(gPrice)) {
-        alert("يرجى ملء الاسم والأسعار المطلوبة بشكل صحيح");
-        return;
-      }
-
-      currentMenuData[catIdx].items[itemIdx].name_ar = nameAr;
-      currentMenuData[catIdx].items[itemIdx].name_en = nameEn || nameAr;
-      currentMenuData[catIdx].items[itemIdx].desc_ar = descAr;
-      currentMenuData[catIdx].items[itemIdx].desc_en = descEn;
-      currentMenuData[catIdx].items[itemIdx].img = img;
-      currentMenuData[catIdx].
