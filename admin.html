@@ -278,6 +278,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyALAk-3SXOw7kmrwKrGp5cp9o77Nxf9Ufo",
@@ -292,22 +295,39 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     let currentMenuData = [];
-    let openedCategories = {}; // حفظ الأقسام المفتوحة حتى لا تغلق تلقائياً عند التحديث
+    let openedCategories = {};
 
-    // مزامنة البيانات المباشرة
+    // استدعاء فوري للرسم لمنع التعليق
+    renderMenuAccordion();
+
+    // الاستماع المباشر للتغييرات في السيرفر
     db.collection("menu").doc("categories").onSnapshot((doc) => {
-      if (doc.exists && doc.data().list) {
+      if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
         currentMenuData = doc.data().list;
       } else {
         currentMenuData = [];
+        // إنشاء الوثيقة إذا كانت غير موجودة لضمان استقرار السيرفر
+        db.collection("menu").doc("categories").set({ list: [] }, { merge: true });
       }
       populateCategoriesDropdown();
       renderMenuAccordion();
+    }, (error) => {
+      console.error("Firebase Snapshot Error: ", error);
+      document.getElementById('accordion-container').innerHTML = 
+        '<p style="color:#E74C3C; font-size:13px; text-align:center;">تعذر الاتصال بالسيرفر، تأكد من الاتصال بالإنترنت أو أعد تحميل الصفحة.</p>';
     });
 
     function populateCategoriesDropdown() {
       const select = document.getElementById('item-cat');
+      if (!select) return;
       select.innerHTML = '';
+      if (currentMenuData.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.innerText = 'يرجى إضافة قسم أولاً';
+        select.appendChild(opt);
+        return;
+      }
       currentMenuData.forEach(cat => {
         const opt = document.createElement('option');
         opt.value = cat.id;
@@ -316,13 +336,13 @@
       });
     }
 
-    // بناء الأقسام بنظام الأكورديون المنسدل
     function renderMenuAccordion() {
       const container = document.getElementById('accordion-container');
+      if (!container) return;
       container.innerHTML = '';
 
       if (currentMenuData.length === 0) {
-        container.innerHTML = '<p style="color:#aaa; font-size:13px;">لا توجد أقسام أو أصناف حالياً.</p>';
+        container.innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام حالياً. استخدم النموذج بالأعلى لإضافة أول قسم.</p>';
         return;
       }
 
@@ -333,11 +353,9 @@
         const group = document.createElement('div');
         group.className = 'cat-accordion-group';
 
-        // ترويسة القسم
         const header = document.createElement('div');
         header.className = 'cat-accordion-header';
         header.onclick = (e) => {
-          // منع فتح الأكورديون إذا ضغط المستخدم على زر الحذف الخاص بالقسم
           if (e.target.closest('.cat-delete-btn')) return;
           toggleCategoryAccordion(cat.id);
         };
@@ -353,14 +371,13 @@
           </div>
         `;
 
-        // محتوى الأصناف المنسدل
         const body = document.createElement('div');
         body.className = 'cat-body-items';
         body.id = `cat-body-${cat.id}`;
         body.style.display = isOpened ? 'block' : 'none';
 
         if (items.length === 0) {
-          body.innerHTML = '<p style="color:#888; font-size:12px; text-align:center; padding:8px;">لا توجد أصناف في هذا القسم حالياً.</p>';
+          body.innerHTML = '<p style="color:#888; font-size:12px; text-align:center; padding:8px;">لا توجد أصناف في هذا القسم بعد.</p>';
         } else {
           items.forEach((item, itemIdx) => {
             const row = document.createElement('div');
@@ -389,7 +406,6 @@
       });
     }
 
-    // فتح وإغلاق القسم
     function toggleCategoryAccordion(catId) {
       openedCategories[catId] = !openedCategories[catId];
       const body = document.getElementById(`cat-body-${catId}`);
@@ -407,7 +423,7 @@
     function addCategory() {
       const nameAr = document.getElementById('cat-name-ar').value.trim();
       const nameEn = document.getElementById('cat-name-en').value.trim();
-      if(!nameAr) {
+      if (!nameAr) {
         alert("يرجى إدخال اسم القسم بالعربي");
         return;
       }
@@ -420,12 +436,14 @@
         items: []
       };
       currentMenuData.push(newCat);
-      openedCategories[newCatId] = true; // فتحه تلقائياً ليكون جاهزاً لإضافة أصناف
+      openedCategories[newCatId] = true;
       
       db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
         document.getElementById('cat-name-ar').value = '';
         document.getElementById('cat-name-en').value = '';
         alert("تمت إضافة القسم الجديد بنجاح!");
+      }).catch(err => {
+        alert("حدث خطأ أثناء الحفظ: " + err.message);
       });
     }
 
@@ -441,6 +459,10 @@
 
     function addItem() {
       const catId = document.getElementById('item-cat').value;
+      if (!catId) {
+        alert("يرجى اختيار القسم أولاً (أو إنشاء قسم جديد إذا لم تكن هناك أقسام)");
+        return;
+      }
       const nameAr = document.getElementById('name-ar').value.trim();
       const nameEn = document.getElementById('name-en').value.trim();
       const descAr = document.getElementById('desc-ar').value.trim();
@@ -467,7 +489,7 @@
           guest_price: gPrice
         });
 
-        openedCategories[catId] = true; // إبقاء القسم مفتوحاً لمشاهدة الصنف المضاف فوراً
+        openedCategories[catId] = true;
 
         db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
           document.getElementById('name-ar').value = '';
@@ -478,6 +500,8 @@
           document.getElementById('member-price').value = '';
           document.getElementById('guest-price').value = '';
           alert("تم حفظ الصنف بنجاح!");
+        }).catch(err => {
+          alert("حدث خطأ أثناء الحفظ: " + err.message);
         });
       }
     }
@@ -520,4 +544,22 @@
       currentMenuData[catIdx].items[itemIdx].name_en = nameEn || nameAr;
       currentMenuData[catIdx].items[itemIdx].desc_ar = descAr;
       currentMenuData[catIdx].items[itemIdx].desc_en = descEn;
-      currentMenuData[catIdx].i
+      currentMenuData[catIdx].items[itemIdx].img = img;
+      currentMenuData[catIdx].items[itemIdx].member_price = mPrice;
+      currentMenuData[catIdx].items[itemIdx].guest_price = gPrice;
+
+      db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
+        closeEditModal();
+        alert("تم تحديث الصنف بنجاح!");
+      }).catch(err => {
+        alert("خطأ أثناء الحفظ: " + err.message);
+      });
+    }
+
+    function deleteItem(catIdx, itemIdx) {
+      if (confirm("هل تريد حذف هذا الصنف؟")) {
+        currentMenuData[catIdx].items.splice(itemIdx, 1);
+        db.collection("menu").doc("categories").set({ list: currentMenuData });
+      }
+    }
+  </script>
