@@ -53,7 +53,7 @@
     .btn { background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; font-size: 14px; }
     .btn:hover { background: #BF161E; }
     
-    /* تصميم تقسيم الأقسام التفاعلية (Accordion) */
+    /* تصميم الأكورديون للأقسام */
     .cat-accordion-group {
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -71,9 +71,7 @@
       user-select: none;
       transition: background 0.2s;
     }
-    .cat-accordion-header:hover {
-      background: #2c2c36;
-    }
+    .cat-accordion-header:hover { background: #2c2c36; }
     .cat-title-info {
       display: flex;
       align-items: center;
@@ -87,9 +85,7 @@
       color: var(--gold);
       transition: transform 0.3s ease;
     }
-    .cat-title-info.active i.arrow-icon {
-      transform: rotate(180deg);
-    }
+    .cat-title-info.active i.arrow-icon { transform: rotate(180deg); }
     .cat-badge {
       font-size: 11px;
       background: rgba(221, 170, 56, 0.2);
@@ -97,11 +93,7 @@
       padding: 2px 8px;
       border-radius: 10px;
     }
-    .cat-header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .cat-header-actions { display: flex; align-items: center; gap: 8px; }
     .cat-body-items {
       display: none;
       padding: 10px;
@@ -147,7 +139,7 @@
 
   <div class="header">
     <h1>لوحة إدارة منيو نادي الجلاء</h1>
-    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إضافة أقسام، وحذفها، وتعديل الأصناف وأسعارها بسهولة</p>
+    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إضافة أقسام، وحذفها، وتعديل الأصناف (مع الترجمة التلقائية للإنجليزية)</p>
   </div>
 
   <!-- إضافة قسم جديد -->
@@ -155,7 +147,7 @@
     <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد (Category)</h2>
     <div class="row">
       <div class="form-group">
-        <label>اسم القسم بالعربي</label>
+        <label>اسم القسم بالعربي (اكتب واخرج للترجمة التلقائية)</label>
         <input type="text" id="cat-name-ar" placeholder="مثال: مشويات">
       </div>
       <div class="form-group">
@@ -216,14 +208,14 @@
     <button class="btn" id="save-btn" onclick="addItem()"><i class="fa-solid fa-check"></i> حفظ الصنف في المنيو</button>
   </div>
 
-  <!-- عرض الأصناف مرتبة داخل أقسامها بأسلوب منسدل -->
+  <!-- عرض الأصناف مقسمة حسب الفئات -->
   <div class="panel">
     <h2><i class="fa-solid fa-layer-group"></i> الأصناف الحالية مقسمة حسب الفئات</h2>
     <p style="font-size: 12px; color: #888; margin-bottom: 12px;">اضغط على أي قسم لعرض أو إخفاء الأصناف الخاصة به:</p>
     <div id="accordion-container">جاري تحميل البيانات...</div>
   </div>
 
-  <!-- نافذة تعديل الصنف المنبثقة -->
+  <!-- نافذة تعديل الصنف -->
   <div id="edit-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -278,9 +270,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyALAk-3SXOw7kmrwKrGp5cp9o77Nxf9Ufo",
@@ -297,16 +286,93 @@
     let currentMenuData = [];
     let openedCategories = {};
 
-    // استدعاء فوري للرسم لمنع التعليق
+    // ==========================================
+    // دالة الترجمة التلقائية السريعة
+    // ==========================================
+    async function autoTranslate(text) {
+      if (!text || !text.trim()) return '';
+      try {
+        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.trim())}&langpair=ar|en`);
+        const data = await res.json();
+        if (data && data.responseData && data.responseData.translatedText) {
+          return data.responseData.translatedText;
+        }
+      } catch (err) {
+        console.error("خطأ أثناء الترجمة:", err);
+      }
+      return '';
+    }
+
+    // ربط الحقول بالترجمة التلقائية عند الخروج من الحقل (blur)
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. ترجمة اسم القسم
+      const catAr = document.getElementById('cat-name-ar');
+      const catEn = document.getElementById('cat-name-en');
+      catAr.addEventListener('blur', async () => {
+        if (catAr.value.trim() && !catEn.value.trim()) {
+          catEn.placeholder = "جاري الترجمة...";
+          const trans = await autoTranslate(catAr.value);
+          if (trans) catEn.value = trans;
+          catEn.placeholder = "e.g. Grills";
+        }
+      });
+
+      // 2. ترجمة اسم الصنف
+      const nameAr = document.getElementById('name-ar');
+      const nameEn = document.getElementById('name-en');
+      nameAr.addEventListener('blur', async () => {
+        if (nameAr.value.trim() && !nameEn.value.trim()) {
+          nameEn.placeholder = "جاري الترجمة...";
+          const trans = await autoTranslate(nameAr.value);
+          if (trans) nameEn.value = trans;
+          nameEn.placeholder = "e.g. Grilled Kebab";
+        }
+      });
+
+      // 3. ترجمة وصف الصنف
+      const descAr = document.getElementById('desc-ar');
+      const descEn = document.getElementById('desc-en');
+      descAr.addEventListener('blur', async () => {
+        if (descAr.value.trim() && !descEn.value.trim()) {
+          descEn.placeholder = "جاري الترجمة...";
+          const trans = await autoTranslate(descAr.value);
+          if (trans) descEn.value = trans;
+          descEn.placeholder = "e.g. Charcoal grilled lamb kebab...";
+        }
+      });
+
+      // 4. ترجمة الحقول داخل نافذة التعديل
+      const editNameAr = document.getElementById('edit-name-ar');
+      const editNameEn = document.getElementById('edit-name-en');
+      editNameAr.addEventListener('blur', async () => {
+        if (editNameAr.value.trim() && !editNameEn.value.trim()) {
+          editNameEn.placeholder = "جاري الترجمة...";
+          const trans = await autoTranslate(editNameAr.value);
+          if (trans) editNameEn.value = trans;
+        }
+      });
+
+      const editDescAr = document.getElementById('edit-desc-ar');
+      const editDescEn = document.getElementById('edit-desc-en');
+      editDescAr.addEventListener('blur', async () => {
+        if (editDescAr.value.trim() && !editDescEn.value.trim()) {
+          editDescEn.placeholder = "جاري الترجمة...";
+          const trans = await autoTranslate(editDescAr.value);
+          if (trans) editDescEn.value = trans;
+        }
+      });
+    });
+
+    // ==========================================
+    // إدارة البيانات وقاعدة Firestore
+    // ==========================================
     renderMenuAccordion();
 
-    // الاستماع المباشر للتغييرات في السيرفر
     db.collection("menu").doc("categories").onSnapshot((doc) => {
       if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
         currentMenuData = doc.data().list;
       } else {
         currentMenuData = [];
-        // إنشاء الوثيقة إذا كانت غير موجودة لضمان استقرار السيرفر
         db.collection("menu").doc("categories").set({ list: [] }, { merge: true });
       }
       populateCategoriesDropdown();
@@ -563,3 +629,5 @@
       }
     }
   </script>
+</body>
+</html>
