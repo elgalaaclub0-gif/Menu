@@ -23,6 +23,7 @@
       --card: #1B1B1F;
       --border: #2C2C32;
       --blue: #2980B9;
+      --dark-btn: #33333d;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
     body { background: var(--bg); color: #fff; padding: 20px 15px; }
@@ -30,7 +31,7 @@
     .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
     .header h1 { color: var(--gold); font-size: 22px; }
     
-    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; max-width: 650px; margin-inline: auto; }
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; max-width: 680px; margin-inline: auto; }
     .panel h2 { font-size: 16px; color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
     
     .form-group { margin-bottom: 12px; }
@@ -53,7 +54,6 @@
     .btn { background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; font-size: 14px; }
     .btn:hover { background: #BF161E; }
     
-    /* تصميم الأكورديون للأقسام */
     .cat-accordion-group {
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -93,7 +93,11 @@
       padding: 2px 8px;
       border-radius: 10px;
     }
-    .cat-header-actions { display: flex; align-items: center; gap: 8px; }
+    .cat-icon-display {
+      font-size: 18px;
+      margin-inline-end: 4px;
+    }
+    .cat-header-actions { display: flex; align-items: center; gap: 6px; }
     .cat-body-items {
       display: none;
       padding: 10px;
@@ -102,14 +106,15 @@
     }
     
     .item-row { display: flex; justify-content: space-between; align-items: center; background: #222228; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #2a2a32; }
-    .actions-box { display: flex; gap: 6px; }
+    .actions-box { display: flex; align-items: center; gap: 5px; }
     .del-btn { background: #E74C3C; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
     .del-btn:hover { background: #c0392b; }
     .edit-btn { background: var(--blue); color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
     .edit-btn:hover { background: #1f618d; }
+    .order-btn { background: var(--dark-btn); color: var(--gold); border: 1px solid var(--border); padding: 5px 9px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .order-btn:hover { background: #444450; color: #fff; }
     .item-thumb { width: 38px; height: 38px; border-radius: 6px; object-fit: cover; margin-inline-end: 10px; vertical-align: middle; }
 
-    /* نافذة التعديل المنبثقة */
     #edit-modal {
       position: fixed;
       inset: 0;
@@ -125,7 +130,7 @@
       border: 1px solid var(--blue);
       border-radius: 12px;
       padding: 20px;
-      max-width: 500px;
+      max-width: 520px;
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
@@ -139,20 +144,24 @@
 
   <div class="header">
     <h1>لوحة إدارة منيو نادي الجلاء</h1>
-    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إضافة أقسام، وحذفها، وتعديل الأصناف (مع الترجمة التلقائية للإنجليزية)</p>
+    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إدارة كاملة: نقل الأصناف بين الأقسام، الترتيب بالأسهم، وتخصيص الإيموجي</p>
   </div>
 
-  <!-- إضافة قسم جديد -->
+  <!-- إضافة قسم جديد مع إيموجي/أيقونة -->
   <div class="panel">
     <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد (Category)</h2>
     <div class="row">
-      <div class="form-group">
-        <label>اسم القسم بالعربي (اكتب واخرج للترجمة التلقائية)</label>
+      <div class="form-group" style="flex: 2;">
+        <label>اسم القسم بالعربي (مترجم تلقائياً)</label>
         <input type="text" id="cat-name-ar" placeholder="مثال: مشويات">
       </div>
-      <div class="form-group">
+      <div class="form-group" style="flex: 2;">
         <label>اسم القسم بالإنجليزي</label>
         <input type="text" id="cat-name-en" placeholder="e.g. Grills">
+      </div>
+      <div class="form-group" style="flex: 1;">
+        <label>الإيموجي / الأيقونة</label>
+        <input type="text" id="cat-icon" placeholder="🍗 أو fa-leaf" value="🍽️">
       </div>
     </div>
     <button class="btn" onclick="addCategory()"><i class="fa-solid fa-plus"></i> إضافة القسم</button>
@@ -208,22 +217,27 @@
     <button class="btn" id="save-btn" onclick="addItem()"><i class="fa-solid fa-check"></i> حفظ الصنف في المنيو</button>
   </div>
 
-  <!-- عرض الأصناف مقسمة حسب الفئات -->
+  <!-- عرض الأصناف مقسمة حسب الفئات مع أزرار الترتيب -->
   <div class="panel">
     <h2><i class="fa-solid fa-layer-group"></i> الأصناف الحالية مقسمة حسب الفئات</h2>
-    <p style="font-size: 12px; color: #888; margin-bottom: 12px;">اضغط على أي قسم لعرض أو إخفاء الأصناف الخاصة به:</p>
+    <p style="font-size: 12px; color: #888; margin-bottom: 12px;">استخدم الأسهم (⬆️ ⬇️) لترتيب ظهور الأقسام أو الأصناف في المنيو:</p>
     <div id="accordion-container">جاري تحميل البيانات...</div>
   </div>
 
-  <!-- نافذة تعديل الصنف -->
+  <!-- نافذة تعديل الصنف (بها خيار نقل القسم) -->
   <div id="edit-modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3><i class="fa-solid fa-pen-to-square"></i> تعديل بيانات الصنف</h3>
+        <h3><i class="fa-solid fa-pen-to-square"></i> تعديل بيانات الصنف ونقله</h3>
         <button class="close-modal" onclick="closeEditModal()">&times;</button>
       </div>
       <input type="hidden" id="edit-cat-idx">
       <input type="hidden" id="edit-item-idx">
+
+      <div class="form-group">
+        <label style="color:var(--gold); font-weight:bold;">القسم التابع له (يمكنك تغيير القسم لنقل الصنف فوراً):</label>
+        <select id="edit-item-cat"></select>
+      </div>
 
       <div class="row">
         <div class="form-group">
@@ -263,7 +277,7 @@
         </div>
       </div>
 
-      <button class="btn" style="background:var(--blue);" onclick="saveEditItem()"><i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات</button>
+      <button class="btn" style="background:var(--blue);" onclick="saveEditItem()"><i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات والنقل</button>
     </div>
   </div>
 
@@ -286,9 +300,7 @@
     let currentMenuData = [];
     let openedCategories = {};
 
-    // ==========================================
-    // دالة الترجمة التلقائية السريعة
-    // ==========================================
+    // الترجمة التلقائية
     async function autoTranslate(text) {
       if (!text || !text.trim()) return '';
       try {
@@ -297,15 +309,11 @@
         if (data && data.responseData && data.responseData.translatedText) {
           return data.responseData.translatedText;
         }
-      } catch (err) {
-        console.error("خطأ أثناء الترجمة:", err);
-      }
+      } catch (err) {}
       return '';
     }
 
-    // ربط الحقول بالترجمة التلقائية عند الخروج من الحقل (blur)
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. ترجمة اسم القسم
       const catAr = document.getElementById('cat-name-ar');
       const catEn = document.getElementById('cat-name-en');
       catAr.addEventListener('blur', async () => {
@@ -317,7 +325,6 @@
         }
       });
 
-      // 2. ترجمة اسم الصنف
       const nameAr = document.getElementById('name-ar');
       const nameEn = document.getElementById('name-en');
       nameAr.addEventListener('blur', async () => {
@@ -329,7 +336,6 @@
         }
       });
 
-      // 3. ترجمة وصف الصنف
       const descAr = document.getElementById('desc-ar');
       const descEn = document.getElementById('desc-en');
       descAr.addEventListener('blur', async () => {
@@ -341,7 +347,6 @@
         }
       });
 
-      // 4. ترجمة الحقول داخل نافذة التعديل
       const editNameAr = document.getElementById('edit-name-ar');
       const editNameEn = document.getElementById('edit-name-en');
       editNameAr.addEventListener('blur', async () => {
@@ -363,11 +368,9 @@
       });
     });
 
-    // ==========================================
-    // إدارة البيانات وقاعدة Firestore
-    // ==========================================
     renderMenuAccordion();
 
+    // الاستماع المباشر من Firestore
     db.collection("menu").doc("categories").onSnapshot((doc) => {
       if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
         currentMenuData = doc.data().list;
@@ -377,10 +380,6 @@
       }
       populateCategoriesDropdown();
       renderMenuAccordion();
-    }, (error) => {
-      console.error("Firebase Snapshot Error: ", error);
-      document.getElementById('accordion-container').innerHTML = 
-        '<p style="color:#E74C3C; font-size:13px; text-align:center;">تعذر الاتصال بالسيرفر، تأكد من الاتصال بالإنترنت أو أعد تحميل الصفحة.</p>';
     });
 
     function populateCategoriesDropdown() {
@@ -397,9 +396,18 @@
       currentMenuData.forEach(cat => {
         const opt = document.createElement('option');
         opt.value = cat.id;
-        opt.innerText = `${cat.name_ar} (${cat.name_en || ''})`;
+        const iconDisplay = formatIconDisplay(cat.icon);
+        opt.innerText = `${iconDisplay} ${cat.name_ar} (${cat.name_en || ''})`;
         select.appendChild(opt);
       });
+    }
+
+    function formatIconDisplay(icon) {
+      if (!icon) return '🍽️';
+      if (icon.startsWith('fa-')) {
+        return `<i class="fa-solid ${icon}"></i>`;
+      }
+      return icon; // إيموجي مباشر
     }
 
     function renderMenuAccordion() {
@@ -415,6 +423,7 @@
       currentMenuData.forEach((cat, catIdx) => {
         const items = cat.items || [];
         const isOpened = openedCategories[cat.id] === true;
+        const iconHtml = formatIconDisplay(cat.icon);
 
         const group = document.createElement('div');
         group.className = 'cat-accordion-group';
@@ -422,18 +431,21 @@
         const header = document.createElement('div');
         header.className = 'cat-accordion-header';
         header.onclick = (e) => {
-          if (e.target.closest('.cat-delete-btn')) return;
+          if (e.target.closest('.cat-btn-action')) return;
           toggleCategoryAccordion(cat.id);
         };
 
         header.innerHTML = `
           <div class="cat-title-info ${isOpened ? 'active' : ''}" id="title-info-${cat.id}">
             <i class="fa-solid fa-chevron-down arrow-icon"></i>
+            <span class="cat-icon-display">${iconHtml}</span>
             <span>${cat.name_ar} <small style="color:#aaa; font-weight:normal;">(${cat.name_en || ''})</small></span>
             <span class="cat-badge">${items.length} صنف</span>
           </div>
-          <div class="cat-header-actions">
-            <button class="del-btn cat-delete-btn" onclick="deleteCategory(${catIdx})" title="حذف هذا القسم بالكامل"><i class="fa-solid fa-trash"></i> حذف القسم</button>
+          <div class="cat-header-actions cat-btn-action">
+            <button class="order-btn" onclick="moveCategory(${catIdx}, -1)" title="تحريك القسم لأعلى"><i class="fa-solid fa-arrow-up"></i></button>
+            <button class="order-btn" onclick="moveCategory(${catIdx}, 1)" title="تحريك القسم لأسفل"><i class="fa-solid fa-arrow-down"></i></button>
+            <button class="del-btn" onclick="deleteCategory(${catIdx})" title="حذف هذا القسم بالكامل"><i class="fa-solid fa-trash"></i> حذف</button>
           </div>
         `;
 
@@ -458,7 +470,9 @@
                 <span style="font-size: 11px; color: var(--gold);">عضو: ${item.member_price} ج.م | زائر: ${item.guest_price} ج.م</span>
               </div>
               <div class="actions-box">
-                <button class="edit-btn" onclick="openEditModal(${catIdx}, ${itemIdx})"><i class="fa-solid fa-pen"></i> تعديل</button>
+                <button class="order-btn" onclick="moveItem(${catIdx}, ${itemIdx}, -1)" title="تحريك لأعلى"><i class="fa-solid fa-arrow-up"></i></button>
+                <button class="order-btn" onclick="moveItem(${catIdx}, ${itemIdx}, 1)" title="تحريك لأسفل"><i class="fa-solid fa-arrow-down"></i></button>
+                <button class="edit-btn" onclick="openEditModal(${catIdx}, ${itemIdx})"><i class="fa-solid fa-pen"></i> تعديل / نقل</button>
                 <button class="del-btn" onclick="deleteItem(${catIdx}, ${itemIdx})"><i class="fa-solid fa-trash"></i> حذف</button>
               </div>
             `;
@@ -480,154 +494,15 @@
       if (body) {
         const isOpen = openedCategories[catId];
         body.style.display = isOpen ? 'block' : 'none';
-        if (titleInfo) {
-          titleInfo.classList.toggle('active', isOpen);
-        }
+        if (titleInfo) titleInfo.classList.toggle('active', isOpen);
       }
     }
 
-    function addCategory() {
-      const nameAr = document.getElementById('cat-name-ar').value.trim();
-      const nameEn = document.getElementById('cat-name-en').value.trim();
-      if (!nameAr) {
-        alert("يرجى إدخال اسم القسم بالعربي");
-        return;
-      }
-      const newCatId = "cat_" + Date.now();
-      const newCat = {
-        id: newCatId,
-        name_ar: nameAr,
-        name_en: nameEn || nameAr,
-        icon: "fa-utensils",
-        items: []
-      };
-      currentMenuData.push(newCat);
-      openedCategories[newCatId] = true;
-      
-      db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
-        document.getElementById('cat-name-ar').value = '';
-        document.getElementById('cat-name-en').value = '';
-        alert("تمت إضافة القسم الجديد بنجاح!");
-      }).catch(err => {
-        alert("حدث خطأ أثناء الحفظ: " + err.message);
-      });
-    }
-
-    function deleteCategory(catIdx) {
-      const catName = currentMenuData[catIdx].name_ar;
-      if (confirm(`هل أنت متأكد من حذف قسم "${catName}" وجميع الأصناف بداخله؟`)) {
-        currentMenuData.splice(catIdx, 1);
-        db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
-          alert(`تم حذف قسم "${catName}" بنجاح!`);
-        });
-      }
-    }
-
-    function addItem() {
-      const catId = document.getElementById('item-cat').value;
-      if (!catId) {
-        alert("يرجى اختيار القسم أولاً (أو إنشاء قسم جديد إذا لم تكن هناك أقسام)");
-        return;
-      }
-      const nameAr = document.getElementById('name-ar').value.trim();
-      const nameEn = document.getElementById('name-en').value.trim();
-      const descAr = document.getElementById('desc-ar').value.trim();
-      const descEn = document.getElementById('desc-en').value.trim();
-      const img = document.getElementById('item-img').value.trim();
-      const mPrice = parseFloat(document.getElementById('member-price').value);
-      const gPrice = parseFloat(document.getElementById('guest-price').value);
-
-      if (!nameAr || isNaN(mPrice) || isNaN(gPrice)) {
-        alert("يرجى ملء الاسم والأسعار المطلوبة");
-        return;
-      }
-
-      const targetCat = currentMenuData.find(c => c.id === catId);
-      if (targetCat) {
-        if (!targetCat.items) targetCat.items = [];
-        targetCat.items.unshift({
-          name_ar: nameAr,
-          name_en: nameEn || nameAr,
-          desc_ar: descAr,
-          desc_en: descEn,
-          img: img,
-          member_price: mPrice,
-          guest_price: gPrice
-        });
-
-        openedCategories[catId] = true;
-
-        db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
-          document.getElementById('name-ar').value = '';
-          document.getElementById('name-en').value = '';
-          document.getElementById('desc-ar').value = '';
-          document.getElementById('desc-en').value = '';
-          document.getElementById('item-img').value = '';
-          document.getElementById('member-price').value = '';
-          document.getElementById('guest-price').value = '';
-          alert("تم حفظ الصنف بنجاح!");
-        }).catch(err => {
-          alert("حدث خطأ أثناء الحفظ: " + err.message);
-        });
-      }
-    }
-
-    function openEditModal(catIdx, itemIdx) {
-      const item = currentMenuData[catIdx].items[itemIdx];
-      document.getElementById('edit-cat-idx').value = catIdx;
-      document.getElementById('edit-item-idx').value = itemIdx;
-      document.getElementById('edit-name-ar').value = item.name_ar || '';
-      document.getElementById('edit-name-en').value = item.name_en || '';
-      document.getElementById('edit-desc-ar').value = item.desc_ar || '';
-      document.getElementById('edit-desc-en').value = item.desc_en || '';
-      document.getElementById('edit-img').value = item.img || '';
-      document.getElementById('edit-member-price').value = item.member_price;
-      document.getElementById('edit-guest-price').value = item.guest_price;
-      document.getElementById('edit-modal').style.display = 'flex';
-    }
-
-    function closeEditModal() {
-      document.getElementById('edit-modal').style.display = 'none';
-    }
-
-    function saveEditItem() {
-      const catIdx = document.getElementById('edit-cat-idx').value;
-      const itemIdx = document.getElementById('edit-item-idx').value;
-      const nameAr = document.getElementById('edit-name-ar').value.trim();
-      const nameEn = document.getElementById('edit-name-en').value.trim();
-      const descAr = document.getElementById('edit-desc-ar').value.trim();
-      const descEn = document.getElementById('edit-desc-en').value.trim();
-      const img = document.getElementById('edit-img').value.trim();
-      const mPrice = parseFloat(document.getElementById('edit-member-price').value);
-      const gPrice = parseFloat(document.getElementById('edit-guest-price').value);
-
-      if (!nameAr || isNaN(mPrice) || isNaN(gPrice)) {
-        alert("يرجى ملء الاسم والأسعار المطلوبة بشكل صحيح");
-        return;
-      }
-
-      currentMenuData[catIdx].items[itemIdx].name_ar = nameAr;
-      currentMenuData[catIdx].items[itemIdx].name_en = nameEn || nameAr;
-      currentMenuData[catIdx].items[itemIdx].desc_ar = descAr;
-      currentMenuData[catIdx].items[itemIdx].desc_en = descEn;
-      currentMenuData[catIdx].items[itemIdx].img = img;
-      currentMenuData[catIdx].items[itemIdx].member_price = mPrice;
-      currentMenuData[catIdx].items[itemIdx].guest_price = gPrice;
-
-      db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
-        closeEditModal();
-        alert("تم تحديث الصنف بنجاح!");
-      }).catch(err => {
-        alert("خطأ أثناء الحفظ: " + err.message);
-      });
-    }
-
-    function deleteItem(catIdx, itemIdx) {
-      if (confirm("هل تريد حذف هذا الصنف؟")) {
-        currentMenuData[catIdx].items.splice(itemIdx, 1);
-        db.collection("menu").doc("categories").set({ list: currentMenuData });
-      }
-    }
-  </script>
-</body>
-</html>
+    // ترتيب الأقسام لأعلى وأسفل
+    function moveCategory(index, direction) {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= currentMenuData.length) return;
+      const temp = currentMenuData[index];
+      currentMenuData[index] = currentMenuData[newIndex];
+      currentMenuData[newIndex] = temp;
+      saveToFirebas
