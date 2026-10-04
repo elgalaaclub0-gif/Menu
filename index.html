@@ -2,284 +2,357 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم | منيو نادي الجلاء</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>قائمة طعام | نادي الجلاء للقوات المسلحة</title>
   
-  <script>
-    var pass = prompt("من فضلك أدخل كلمة مرور لوحة التحكم:");
-    if (pass !== "123456") {
-      alert("كلمة المرور غير صحيحة!");
-      window.location.href = "index.html";
-    }
-  </script>
-
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
     :root {
-      --primary: #A31219;
-      --gold: #DDAA38;
-      --bg: #121214;
-      --card: #1B1B1F;
-      --border: #2C2C32;
-      --blue: #2980B9;
-      --dark-btn: #33333d;
+      --primary-red: #A31219;
+      --dark-red: #66080D;
+      --accent-gold: #DDAA38;
+      --gold-light: #F7E7A6;
+      --bg-dark: #121214;
+      --card-bg: #1B1B1F;
+      --card-border: #2C2C32;
+      --text-main: #FFFFFF;
+      --text-muted: #A0A0A8;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-    body { background: var(--bg); color: #fff; padding: 20px 15px; }
 
-    .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
-    .header h1 { color: var(--gold); font-size: 22px; }
-    
-    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; max-width: 680px; margin-inline: auto; }
-    .panel h2 { font-size: 16px; color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-    
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 13px; color: #A0A0A8; margin-bottom: 4px; }
-    .form-group input, .form-group select, .form-group textarea { 
-      width: 100%; 
-      padding: 10px; 
-      background: #24242A; 
-      border: 1px solid var(--border); 
-      border-radius: 8px; 
-      color: #fff; 
-      font-size: 14px; 
-      outline: none; 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
-    .form-group textarea { resize: vertical; min-height: 60px; font-family: inherit; }
-    
-    .row { display: flex; gap: 10px; }
-    .row .form-group { flex: 1; }
-    
-    .btn { background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; font-size: 14px; }
-    .btn:hover { background: #BF161E; }
-    
-    .cat-accordion-group {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-bottom: 12px;
-      overflow: hidden;
-      background: #1e1e24;
+
+    body.en {
+      font-family: 'Outfit', sans-serif;
+      direction: ltr;
     }
-    .cat-accordion-header {
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 50px;
+    }
+
+    header {
+      background: linear-gradient(180deg, var(--dark-red) 0%, rgba(18, 18, 20, 0.95) 100%);
+      padding: 24px 16px 16px;
+      text-align: center;
+      border-bottom: 1px solid rgba(221, 170, 56, 0.25);
+    }
+
+    .top-controls {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
-      padding: 12px 14px;
-      background: #25252c;
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.2s;
+      margin-bottom: 10px;
     }
-    .cat-accordion-header:hover { background: #2c2c36; }
-    .cat-title-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 15px;
+
+    .lang-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
       font-weight: 700;
+      cursor: pointer;
+    }
+
+    .logo-container {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(135deg, var(--accent-gold), transparent, var(--accent-gold));
+      box-shadow: 0 4px 20px rgba(163, 18, 25, 0.4);
+      overflow: hidden;
+    }
+
+    .logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .club-title {
+      font-size: 21px;
+      font-weight: 800;
+      color: var(--gold-light);
+      margin-bottom: 4px;
+    }
+
+    .sub-title {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .pricing-toggle-wrapper {
+      margin: 18px auto 6px;
+      max-width: 320px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--card-border);
+      border-radius: 30px;
+      padding: 4px;
+      display: flex;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      text-align: center;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 25px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .toggle-btn.active {
+      background: var(--primary-red);
       color: #fff;
     }
-    .cat-title-info i.arrow-icon {
-      font-size: 12px;
-      color: var(--gold);
-      transition: transform 0.3s ease;
-    }
-    .cat-title-info.active i.arrow-icon { transform: rotate(180deg); }
-    .cat-badge {
-      font-size: 11px;
-      background: rgba(221, 170, 56, 0.2);
-      color: var(--gold);
-      padding: 2px 8px;
-      border-radius: 10px;
-    }
-    .cat-icon-display {
-      font-size: 18px;
-      margin-inline-end: 4px;
-    }
-    .cat-header-actions { display: flex; align-items: center; gap: 6px; }
-    .cat-body-items {
-      display: none;
-      padding: 10px;
-      background: #18181c;
-      border-top: 1px solid var(--border);
-    }
-    
-    .item-row { display: flex; justify-content: space-between; align-items: center; background: #222228; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #2a2a32; }
-    .actions-box { display: flex; align-items: center; gap: 5px; }
-    .del-btn { background: #E74C3C; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-    .del-btn:hover { background: #c0392b; }
-    .edit-btn { background: var(--blue); color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-    .edit-btn:hover { background: #1f618d; }
-    .order-btn { background: var(--dark-btn); color: var(--gold); border: 1px solid var(--border); padding: 5px 9px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-    .order-btn:hover { background: #444450; color: #fff; }
-    .item-thumb { width: 38px; height: 38px; border-radius: 6px; object-fit: cover; margin-inline-end: 10px; vertical-align: middle; }
 
-    #edit-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
-      padding: 15px;
+    .toggle-btn.member.active {
+      background: linear-gradient(135deg, #B8860B, var(--accent-gold));
+      color: #121214;
     }
-    .modal-content {
-      background: var(--card);
-      border: 1px solid var(--blue);
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 520px;
+
+    .search-box-container {
+      padding: 12px 16px 4px;
+    }
+
+    .search-bar {
+      position: relative;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .search-bar input {
       width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 11px 40px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
     }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-    .modal-header h3 { color: var(--gold); font-size: 16px; }
-    .close-modal { background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer; }
+
+    .search-bar i {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    body:not(.en) .search-bar i { right: 14px; }
+    body.en .search-bar i { left: 14px; }
+
+    .categories-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      background: rgba(18, 18, 20, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      border-bottom: 1px solid var(--card-border);
+      scrollbar-width: none;
+    }
+    .categories-bar::-webkit-scrollbar { display: none; }
+
+    .category-chip {
+      white-space: nowrap;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .category-chip.active {
+      background: var(--primary-red);
+      color: #fff;
+      border-color: var(--accent-gold);
+    }
+
+    .menu-container {
+      padding: 16px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .category-section {
+      margin-bottom: 26px;
+      scroll-margin-top: 70px;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--accent-gold);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px dashed rgba(221, 170, 56, 0.3);
+      padding-bottom: 6px;
+    }
+
+    .items-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .item-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(221, 170, 56, 0.4);
+    }
+
+    .item-img {
+      width: 65px;
+      height: 65px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid var(--card-border);
+      flex-shrink: 0;
+    }
+
+    .item-details { flex: 1; }
+
+    .item-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 3px;
+    }
+
+    .item-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .member-badge {
+      display: inline-block;
+      font-size: 10px;
+      background: rgba(221, 170, 56, 0.15);
+      color: var(--accent-gold);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+
+    .price-container {
+      text-align: end;
+      min-width: 75px;
+    }
+
+    .price-value {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--accent-gold);
+    }
+
+    .currency { font-size: 11px; }
+
+    .price-type-label {
+      display: block;
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--card-border);
+    }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>لوحة إدارة منيو نادي الجلاء</h1>
-    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إدارة كاملة: نقل الأصناف بين الأقسام، الترتيب بالأسهم، وتخصيص الإيموجي</p>
-  </div>
-
-  <!-- إضافة قسم جديد مع إيموجي/أيقونة -->
-  <div class="panel">
-    <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد (Category)</h2>
-    <div class="row">
-      <div class="form-group" style="flex: 2;">
-        <label>اسم القسم بالعربي (مترجم تلقائياً)</label>
-        <input type="text" id="cat-name-ar" placeholder="مثال: مشويات">
-      </div>
-      <div class="form-group" style="flex: 2;">
-        <label>اسم القسم بالإنجليزي</label>
-        <input type="text" id="cat-name-en" placeholder="e.g. Grills">
-      </div>
-      <div class="form-group" style="flex: 1;">
-        <label>الإيموجي / الأيقونة</label>
-        <input type="text" id="cat-icon" placeholder="🍗 أو fa-leaf" value="🍽️">
-      </div>
-    </div>
-    <button class="btn" onclick="addCategory()"><i class="fa-solid fa-plus"></i> إضافة القسم</button>
-  </div>
-
-  <!-- إضافة صنف جديد -->
-  <div class="panel">
-    <h2><i class="fa-solid fa-plus-circle"></i> إضافة صنف جديد للمنيو</h2>
-    
-    <div class="form-group">
-      <label>اختر القسم</label>
-      <select id="item-cat"></select>
+  <header>
+    <div class="top-controls">
+      <button class="lang-btn" onclick="toggleLanguage()">
+        <i class="fa-solid fa-globe"></i>
+        <span id="lang-label">English</span>
+      </button>
     </div>
 
-    <div class="row">
-      <div class="form-group">
-        <label>اسم الصنف (بالعربي)</label>
-        <input type="text" id="name-ar" placeholder="مثال: كباب مشوي">
-      </div>
-      <div class="form-group">
-        <label>Item Name (English)</label>
-        <input type="text" id="name-en" placeholder="e.g. Grilled Kebab">
-      </div>
+    <div class="logo-container">
+      <img src="435341.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/90/A31219/FFFFFF?text=Galaa'">
     </div>
 
-    <div class="row">
-      <div class="form-group">
-        <label>وصف الصنف (بالعربي) - اختياري</label>
-        <textarea id="desc-ar" placeholder="مثال: كباب ضاني مشوي على الفحم يقدم مع الخضار"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Description (English) - Optional</label>
-        <textarea id="desc-en" placeholder="e.g. Charcoal grilled lamb kebab served with vegetables"></textarea>
-      </div>
+    <h1 class="club-title" id="txt-title">نادي وفنادق القوات المسلحة</h1>
+    <p class="sub-title" id="txt-sub">قائمة الأطعمة والمشروبات | نادي الجلاء</p>
+
+    <div class="pricing-toggle-wrapper">
+      <button class="toggle-btn member active" id="btn-member" onclick="setPriceMode('member')">
+        <i class="fa-solid fa-id-card"></i>
+        <span id="txt-member-btn">حاملي العضوية</span>
+      </button>
+      <button class="toggle-btn" id="btn-guest" onclick="setPriceMode('guest')">
+        <i class="fa-solid fa-user"></i>
+        <span id="txt-guest-btn">الزائرين</span>
+      </button>
     </div>
+  </header>
 
-    <div class="form-group">
-      <label>رابط صورة الوجبة (اختياري - اتركه فارغاً إذا لم توجد صورة)</label>
-      <input type="text" id="item-img" placeholder="https://example.com/photo.jpg">
-    </div>
-
-    <div class="row">
-      <div class="form-group">
-        <label>سعر العضوية (ج.م)</label>
-        <input type="number" id="member-price" placeholder="40">
-      </div>
-      <div class="form-group">
-        <label>سعر الزائر (ج.م)</label>
-        <input type="number" id="guest-price" placeholder="50">
-      </div>
-    </div>
-
-    <button class="btn" id="save-btn" onclick="addItem()"><i class="fa-solid fa-check"></i> حفظ الصنف في المنيو</button>
-  </div>
-
-  <!-- عرض الأصناف مقسمة حسب الفئات مع أزرار الترتيب -->
-  <div class="panel">
-    <h2><i class="fa-solid fa-layer-group"></i> الأصناف الحالية مقسمة حسب الفئات</h2>
-    <p style="font-size: 12px; color: #888; margin-bottom: 12px;">استخدم الأسهم (⬆️ ⬇️) لترتيب ظهور الأقسام أو الأصناف في المنيو:</p>
-    <div id="accordion-container">جاري تحميل البيانات...</div>
-  </div>
-
-  <!-- نافذة تعديل الصنف (بها خيار نقل القسم) -->
-  <div id="edit-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3><i class="fa-solid fa-pen-to-square"></i> تعديل بيانات الصنف ونقله</h3>
-        <button class="close-modal" onclick="closeEditModal()">&times;</button>
-      </div>
-      <input type="hidden" id="edit-cat-idx">
-      <input type="hidden" id="edit-item-idx">
-
-      <div class="form-group">
-        <label style="color:var(--gold); font-weight:bold;">القسم التابع له (يمكنك تغيير القسم لنقل الصنف فوراً):</label>
-        <select id="edit-item-cat"></select>
-      </div>
-
-      <div class="row">
-        <div class="form-group">
-          <label>اسم الصنف (بالعربي)</label>
-          <input type="text" id="edit-name-ar">
-        </div>
-        <div class="form-group">
-          <label>Item Name (English)</label>
-          <input type="text" id="edit-name-en">
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="form-group">
-          <label>وصف الصنف (بالعربي)</label>
-          <textarea id="edit-desc-ar"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Description (English)</label>
-          <textarea id="edit-desc-en"></textarea>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>رابط الصورة (اختياري)</label>
-        <input type="text" id="edit-img">
-      </div>
-
-      <div class="row">
-        <div class="form-group">
-          <label>سعر العضوية (ج.م)</label>
-          <input type="number" id="edit-member-price">
-        </div>
-        <div class="form-group">
-          <label>سعر الزائر (ج.م)</label>
-          <input type="number" id="edit-guest-price">
-        </div>
-      </div>
-
-      <button class="btn" style="background:var(--blue);" onclick="saveEditItem()"><i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات والنقل</button>
+  <div class="search-box-container">
+    <div class="search-bar">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="search-input" placeholder="ابحث عن صنف أو طبق..." oninput="handleSearch()">
     </div>
   </div>
+
+  <div class="categories-bar" id="categories-bar"></div>
+  <main class="menu-container" id="menu-container"></main>
+
+  <footer>
+    <p id="txt-footer">نادي الجلاء للقوات المسلحة &copy; 2026</p>
+  </footer>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -297,112 +370,40 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    let currentMenuData = [];
-    let openedCategories = {};
 
-    // الترجمة التلقائية
-    async function autoTranslate(text) {
-      if (!text || !text.trim()) return '';
-      try {
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.trim())}&langpair=ar|en`);
-        const data = await res.json();
-        if (data && data.responseData && data.responseData.translatedText) {
-          return data.responseData.translatedText;
-        }
-      } catch (err) {}
-      return '';
-    }
+    let menuData = [];
+    let currentLang = 'ar';
+    let currentPricingMode = 'member';
+    let currentFilter = '';
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const catAr = document.getElementById('cat-name-ar');
-      const catEn = document.getElementById('cat-name-en');
-      catAr.addEventListener('blur', async () => {
-        if (catAr.value.trim() && !catEn.value.trim()) {
-          catEn.placeholder = "جاري الترجمة...";
-          const trans = await autoTranslate(catAr.value);
-          if (trans) catEn.value = trans;
-          catEn.placeholder = "e.g. Grills";
-        }
-      });
-
-      const nameAr = document.getElementById('name-ar');
-      const nameEn = document.getElementById('name-en');
-      nameAr.addEventListener('blur', async () => {
-        if (nameAr.value.trim() && !nameEn.value.trim()) {
-          nameEn.placeholder = "جاري الترجمة...";
-          const trans = await autoTranslate(nameAr.value);
-          if (trans) nameEn.value = trans;
-          nameEn.placeholder = "e.g. Grilled Kebab";
-        }
-      });
-
-      const descAr = document.getElementById('desc-ar');
-      const descEn = document.getElementById('desc-en');
-      descAr.addEventListener('blur', async () => {
-        if (descAr.value.trim() && !descEn.value.trim()) {
-          descEn.placeholder = "جاري الترجمة...";
-          const trans = await autoTranslate(descAr.value);
-          if (trans) descEn.value = trans;
-          descEn.placeholder = "e.g. Charcoal grilled lamb kebab...";
-        }
-      });
-
-      const editNameAr = document.getElementById('edit-name-ar');
-      const editNameEn = document.getElementById('edit-name-en');
-      editNameAr.addEventListener('blur', async () => {
-        if (editNameAr.value.trim() && !editNameEn.value.trim()) {
-          editNameEn.placeholder = "جاري الترجمة...";
-          const trans = await autoTranslate(editNameAr.value);
-          if (trans) editNameEn.value = trans;
-        }
-      });
-
-      const editDescAr = document.getElementById('edit-desc-ar');
-      const editDescEn = document.getElementById('edit-desc-en');
-      editDescAr.addEventListener('blur', async () => {
-        if (editDescAr.value.trim() && !editDescEn.value.trim()) {
-          editDescEn.placeholder = "جاري الترجمة...";
-          const trans = await autoTranslate(editDescAr.value);
-          if (trans) editDescEn.value = trans;
-        }
-      });
-    });
-
-    renderMenuAccordion();
-
-    // الاستماع المباشر من Firestore
-    db.collection("menu").doc("categories").onSnapshot((doc) => {
-      if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
-        currentMenuData = doc.data().list;
-      } else {
-        currentMenuData = [];
-        db.collection("menu").doc("categories").set({ list: [] }, { merge: true });
+    const translations = {
+      ar: {
+        langBtn: "English",
+        title: "نادي وفنادق القوات المسلحة",
+        sub: "قائمة الأطعمة والمشروبات | نادي الجلاء",
+        memberBtn: "حاملي العضوية",
+        guestBtn: "الزائرين",
+        searchPlaceholder: "ابحث عن صنف أو طبق...",
+        currency: "ج.م",
+        memberPriceLabel: "سعر العضوية",
+        guestPriceLabel: "سعر الزائر",
+        footer: "نادي الجلاء للقوات المسلحة © 2026"
+      },
+      en: {
+        langBtn: "العربية",
+        title: "Armed Forces Clubs & Hotels",
+        sub: "Food & Beverage Menu | Al-Galaa Club",
+        memberBtn: "Club Members",
+        guestBtn: "Visitors / Guests",
+        searchPlaceholder: "Search for dishes...",
+        currency: "EGP",
+        memberPriceLabel: "Member Price",
+        guestPriceLabel: "Visitor Price",
+        footer: "Al-Galaa Armed Forces Club © 2026"
       }
-      populateCategoriesDropdown();
-      renderMenuAccordion();
-    });
+    };
 
-    function populateCategoriesDropdown() {
-      const select = document.getElementById('item-cat');
-      if (!select) return;
-      select.innerHTML = '';
-      if (currentMenuData.length === 0) {
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.innerText = 'يرجى إضافة قسم أولاً';
-        select.appendChild(opt);
-        return;
-      }
-      currentMenuData.forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat.id;
-        const iconDisplay = formatIconDisplay(cat.icon);
-        opt.innerText = `${iconDisplay} ${cat.name_ar} (${cat.name_en || ''})`;
-        select.appendChild(opt);
-      });
-    }
-
-    function formatIconDisplay(icon) {
+    function formatIcon(icon) {
       if (!icon) return '🍽️';
       if (icon.startsWith('fa-')) {
         return `<i class="fa-solid ${icon}"></i>`;
@@ -410,99 +411,123 @@
       return icon; // إيموجي مباشر
     }
 
-    function renderMenuAccordion() {
-      const container = document.getElementById('accordion-container');
-      if (!container) return;
-      container.innerHTML = '';
+    function toggleLanguage() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      document.body.className = currentLang === 'en' ? 'en' : '';
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+      
+      const t = translations[currentLang];
+      document.getElementById('lang-label').innerText = t.langBtn;
+      document.getElementById('txt-title').innerText = t.title;
+      document.getElementById('txt-sub').innerText = t.sub;
+      document.getElementById('txt-member-btn').innerText = t.memberBtn;
+      document.getElementById('txt-guest-btn').innerText = t.guestBtn;
+      document.getElementById('search-input').placeholder = t.searchPlaceholder;
+      document.getElementById('txt-footer').innerText = t.footer;
 
-      if (currentMenuData.length === 0) {
-        container.innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام حالياً. استخدم النموذج بالأعلى لإضافة أول قسم.</p>';
-        return;
-      }
+      renderCategories();
+      renderMenu();
+    }
 
-      currentMenuData.forEach((cat, catIdx) => {
-        const items = cat.items || [];
-        const isOpened = openedCategories[cat.id] === true;
-        const iconHtml = formatIconDisplay(cat.icon);
+    function setPriceMode(mode) {
+      currentPricingMode = mode;
+      document.getElementById('btn-member').classList.toggle('active', mode === 'member');
+      document.getElementById('btn-guest').classList.toggle('active', mode === 'guest');
+      renderMenu();
+    }
 
-        const group = document.createElement('div');
-        group.className = 'cat-accordion-group';
-
-        const header = document.createElement('div');
-        header.className = 'cat-accordion-header';
-        header.onclick = (e) => {
-          if (e.target.closest('.cat-btn-action')) return;
-          toggleCategoryAccordion(cat.id);
+    function renderCategories() {
+      const bar = document.getElementById('categories-bar');
+      bar.innerHTML = '';
+      menuData.forEach((cat, index) => {
+        const chip = document.createElement('button');
+        chip.className = `category-chip ${index === 0 ? 'active' : ''}`;
+        const iconHtml = formatIcon(cat.icon);
+        chip.innerHTML = `${iconHtml} <span>${currentLang === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)}</span>`;
+        chip.onclick = () => {
+          document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          const target = document.getElementById(`cat-${cat.id}`);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
         };
-
-        header.innerHTML = `
-          <div class="cat-title-info ${isOpened ? 'active' : ''}" id="title-info-${cat.id}">
-            <i class="fa-solid fa-chevron-down arrow-icon"></i>
-            <span class="cat-icon-display">${iconHtml}</span>
-            <span>${cat.name_ar} <small style="color:#aaa; font-weight:normal;">(${cat.name_en || ''})</small></span>
-            <span class="cat-badge">${items.length} صنف</span>
-          </div>
-          <div class="cat-header-actions cat-btn-action">
-            <button class="order-btn" onclick="moveCategory(${catIdx}, -1)" title="تحريك القسم لأعلى"><i class="fa-solid fa-arrow-up"></i></button>
-            <button class="order-btn" onclick="moveCategory(${catIdx}, 1)" title="تحريك القسم لأسفل"><i class="fa-solid fa-arrow-down"></i></button>
-            <button class="del-btn" onclick="deleteCategory(${catIdx})" title="حذف هذا القسم بالكامل"><i class="fa-solid fa-trash"></i> حذف</button>
-          </div>
-        `;
-
-        const body = document.createElement('div');
-        body.className = 'cat-body-items';
-        body.id = `cat-body-${cat.id}`;
-        body.style.display = isOpened ? 'block' : 'none';
-
-        if (items.length === 0) {
-          body.innerHTML = '<p style="color:#888; font-size:12px; text-align:center; padding:8px;">لا توجد أصناف في هذا القسم بعد.</p>';
-        } else {
-          items.forEach((item, itemIdx) => {
-            const row = document.createElement('div');
-            row.className = 'item-row';
-            const thumb = (item.img && item.img.trim() !== '') ? `<img src="${item.img}" class="item-thumb" onerror="this.style.display='none'">` : '';
-            
-            row.innerHTML = `
-              <div>
-                ${thumb}
-                <strong>${item.name_ar}</strong> - <span style="color:#aaa;">${item.name_en || ''}</span><br>
-                <span style="font-size: 11px; color: #888;">${item.desc_ar || 'بدون وصف'}</span><br>
-                <span style="font-size: 11px; color: var(--gold);">عضو: ${item.member_price} ج.م | زائر: ${item.guest_price} ج.م</span>
-              </div>
-              <div class="actions-box">
-                <button class="order-btn" onclick="moveItem(${catIdx}, ${itemIdx}, -1)" title="تحريك لأعلى"><i class="fa-solid fa-arrow-up"></i></button>
-                <button class="order-btn" onclick="moveItem(${catIdx}, ${itemIdx}, 1)" title="تحريك لأسفل"><i class="fa-solid fa-arrow-down"></i></button>
-                <button class="edit-btn" onclick="openEditModal(${catIdx}, ${itemIdx})"><i class="fa-solid fa-pen"></i> تعديل / نقل</button>
-                <button class="del-btn" onclick="deleteItem(${catIdx}, ${itemIdx})"><i class="fa-solid fa-trash"></i> حذف</button>
-              </div>
-            `;
-            body.appendChild(row);
-          });
-        }
-
-        group.appendChild(header);
-        group.appendChild(body);
-        container.appendChild(group);
+        bar.appendChild(chip);
       });
     }
 
-    function toggleCategoryAccordion(catId) {
-      openedCategories[catId] = !openedCategories[catId];
-      const body = document.getElementById(`cat-body-${catId}`);
-      const titleInfo = document.getElementById(`title-info-${catId}`);
-      
-      if (body) {
-        const isOpen = openedCategories[catId];
-        body.style.display = isOpen ? 'block' : 'none';
-        if (titleInfo) titleInfo.classList.toggle('active', isOpen);
-      }
+    function renderMenu() {
+      const container = document.getElementById('menu-container');
+      const t = translations[currentLang];
+      container.innerHTML = '';
+
+      menuData.forEach(cat => {
+        const filteredItems = (cat.items || []).filter(item => {
+          const name = currentLang === 'ar' ? item.name_ar : (item.name_en || item.name_ar);
+          const desc = currentLang === 'ar' ? (item.desc_ar || '') : (item.desc_en || '');
+          return name.toLowerCase().includes(currentFilter.toLowerCase()) || 
+                 desc.toLowerCase().includes(currentFilter.toLowerCase());
+        });
+
+        if (filteredItems.length === 0) return;
+
+        const section = document.createElement('section');
+        section.className = 'category-section';
+        section.id = `cat-${cat.id}`;
+
+        const title = document.createElement('h2');
+        title.className = 'section-title';
+        const iconHtml = formatIcon(cat.icon);
+        title.innerHTML = `${iconHtml} <span>${currentLang === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)}</span>`;
+        section.appendChild(title);
+
+        const grid = document.createElement('div');
+        grid.className = 'items-grid';
+
+        filteredItems.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'item-card';
+
+          const price = currentPricingMode === 'member' ? item.member_price : item.guest_price;
+          const priceLabel = currentPricingMode === 'member' ? t.memberPriceLabel : t.guestPriceLabel;
+          
+          const imageHtml = (item.img && item.img.trim() !== '') 
+            ? `<img src="${item.img}" class="item-img" alt="${item.name_ar}" onerror="this.style.display='none'">` 
+            : '';
+
+          card.innerHTML = `
+            ${imageHtml}
+            <div class="item-details">
+              <div class="item-name">${currentLang === 'ar' ? item.name_ar : (item.name_en || item.name_ar)}</div>
+              ${(item.desc_ar || item.desc_en) ? `<div class="item-desc">${currentLang === 'ar' ? (item.desc_ar || '') : (item.desc_en || '')}</div>` : ''}
+              ${currentPricingMode === 'member' ? `<span class="member-badge"><i class="fa-solid fa-id-badge"></i> عضوية</span>` : ''}
+            </div>
+            <div class="price-container">
+              <div class="price-value">${price} <span class="currency">${t.currency}</span></div>
+              <span class="price-type-label">${priceLabel}</span>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        section.appendChild(grid);
+        container.appendChild(section);
+      });
     }
 
-    // ترتيب الأقسام لأعلى وأسفل
-    function moveCategory(index, direction) {
-      const newIndex = index + direction;
-      if (newIndex < 0 || newIndex >= currentMenuData.length) return;
-      const temp = currentMenuData[index];
-      currentMenuData[index] = currentMenuData[newIndex];
-      currentMenuData[newIndex] = temp;
-      saveToFirebas
+    function handleSearch() {
+      currentFilter = document.getElementById('search-input').value.trim();
+      renderMenu();
+    }
+
+    db.collection("menu").doc("categories").onSnapshot((doc) => {
+      if (doc.exists && doc.data().list) {
+        menuData = doc.data().list;
+      } else {
+        menuData = [];
+      }
+      renderCategories();
+      renderMenu();
+    });
+  </script>
+</body>
+</html>
