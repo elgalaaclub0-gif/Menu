@@ -1,287 +1,4 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم | منيو نادي الجلاء</title>
-  
-  <script>
-    var pass = prompt("من فضلك أدخل كلمة مرور لوحة التحكم:");
-    if (pass !== "123456") {
-      alert("كلمة المرور غير صحيحة!");
-      window.location.href = "index.html";
-    }
-  </script>
-
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root {
-      --primary: #A31219;
-      --gold: #DDAA38;
-      --bg: #121214;
-      --card: #1B1B1F;
-      --border: #2C2C32;
-      --blue: #2980B9;
-      --dark-btn: #33333d;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-    body { background: var(--bg); color: #fff; padding: 20px 15px; }
-
-    .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
-    .header h1 { color: var(--gold); font-size: 22px; }
-    
-    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; max-width: 680px; margin-inline: auto; }
-    .panel h2 { font-size: 16px; color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-    
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 13px; color: #A0A0A8; margin-bottom: 4px; }
-    .form-group input, .form-group select, .form-group textarea { 
-      width: 100%; 
-      padding: 10px; 
-      background: #24242A; 
-      border: 1px solid var(--border); 
-      border-radius: 8px; 
-      color: #fff; 
-      font-size: 14px; 
-      outline: none; 
-    }
-    .form-group textarea { resize: vertical; min-height: 60px; font-family: inherit; }
-    
-    .row { display: flex; gap: 10px; }
-    .row .form-group { flex: 1; }
-    
-    .btn { background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; font-size: 14px; }
-    .btn:hover { background: #BF161E; }
-    
-    .cat-accordion-group {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-bottom: 12px;
-      overflow: hidden;
-      background: #1e1e24;
-    }
-    .cat-accordion-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 14px;
-      background: #25252c;
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.2s;
-    }
-    .cat-accordion-header:hover { background: #2c2c36; }
-    .cat-title-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #fff;
-    }
-    .cat-title-info i.arrow-icon {
-      font-size: 12px;
-      color: var(--gold);
-      transition: transform 0.3s ease;
-    }
-    .cat-title-info.active i.arrow-icon { transform: rotate(180deg); }
-    .cat-badge {
-      font-size: 11px;
-      background: rgba(221, 170, 56, 0.2);
-      color: var(--gold);
-      padding: 2px 8px;
-      border-radius: 10px;
-    }
-    .cat-icon-display {
-      font-size: 18px;
-      margin-inline-end: 4px;
-    }
-    .cat-header-actions { display: flex; align-items: center; gap: 6px; }
-    .cat-body-items {
-      display: none;
-      padding: 10px;
-      background: #18181c;
-      border-top: 1px solid var(--border);
-    }
-    
-    .item-row { display: flex; justify-content: space-between; align-items: center; background: #222228; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #2a2a32; }
-    .actions-box { display: flex; align-items: center; gap: 5px; }
-    .del-btn { background: #E74C3C; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-    .del-btn:hover { background: #c0392b; }
-    .edit-btn { background: var(--blue); color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-    .edit-btn:hover { background: #1f618d; }
-    .order-btn { background: var(--dark-btn); color: var(--gold); border: 1px solid var(--border); padding: 5px 9px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-    .order-btn:hover { background: #444450; color: #fff; }
-    .item-thumb { width: 38px; height: 38px; border-radius: 6px; object-fit: cover; margin-inline-end: 10px; vertical-align: middle; }
-
-    #edit-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
-      padding: 15px;
-    }
-    .modal-content {
-      background: var(--card);
-      border: 1px solid var(--blue);
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 520px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-    .modal-header h3 { color: var(--gold); font-size: 16px; }
-    .close-modal { background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer; }
-  </style>
-</head>
-<body>
-
-  <div class="header">
-    <h1>لوحة إدارة منيو نادي الجلاء</h1>
-    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إدارة كاملة: نقل الأصناف بين الأقسام، الترتيب بالأسهم، وتخصيص الإيموجي</p>
-  </div>
-
-  <!-- إضافة قسم جديد مع إيموجي/أيقونة -->
-  <div class="panel">
-    <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد (Category)</h2>
-    <div class="row">
-      <div class="form-group" style="flex: 2;">
-        <label>اسم القسم بالعربي (مترجم تلقائياً)</label>
-        <input type="text" id="cat-name-ar" placeholder="مثال: مشويات">
-      </div>
-      <div class="form-group" style="flex: 2;">
-        <label>اسم القسم بالإنجليزي</label>
-        <input type="text" id="cat-name-en" placeholder="e.g. Grills">
-      </div>
-      <div class="form-group" style="flex: 1;">
-        <label>الإيموجي / الأيقونة</label>
-        <input type="text" id="cat-icon" placeholder="🍗 أو fa-leaf" value="🍽️">
-      </div>
-    </div>
-    <button class="btn" onclick="addCategory()"><i class="fa-solid fa-plus"></i> إضافة القسم</button>
-  </div>
-
-  <!-- إضافة صنف جديد -->
-  <div class="panel">
-    <h2><i class="fa-solid fa-plus-circle"></i> إضافة صنف جديد للمنيو</h2>
-    
-    <div class="form-group">
-      <label>اختر القسم</label>
-      <select id="item-cat"></select>
-    </div>
-
-    <div class="row">
-      <div class="form-group">
-        <label>اسم الصنف (بالعربي)</label>
-        <input type="text" id="name-ar" placeholder="مثال: كباب مشوي">
-      </div>
-      <div class="form-group">
-        <label>Item Name (English)</label>
-        <input type="text" id="name-en" placeholder="e.g. Grilled Kebab">
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="form-group">
-        <label>وصف الصنف (بالعربي) - اختياري</label>
-        <textarea id="desc-ar" placeholder="مثال: كباب ضاني مشوي على الفحم يقدم مع الخضار"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Description (English) - Optional</label>
-        <textarea id="desc-en" placeholder="e.g. Charcoal grilled lamb kebab served with vegetables"></textarea>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>رابط صورة الوجبة (اختياري - اتركه فارغاً إذا لم توجد صورة)</label>
-      <input type="text" id="item-img" placeholder="https://example.com/photo.jpg">
-    </div>
-
-    <div class="row">
-      <div class="form-group">
-        <label>سعر العضوية (ج.م)</label>
-        <input type="number" id="member-price" placeholder="40">
-      </div>
-      <div class="form-group">
-        <label>سعر الزائر (ج.م)</label>
-        <input type="number" id="guest-price" placeholder="50">
-      </div>
-    </div>
-
-    <button class="btn" id="save-btn" onclick="addItem()"><i class="fa-solid fa-check"></i> حفظ الصنف في المنيو</button>
-  </div>
-
-  <!-- عرض الأصناف مقسمة حسب الفئات مع أزرار الترتيب -->
-  <div class="panel">
-    <h2><i class="fa-solid fa-layer-group"></i> الأصناف الحالية مقسمة حسب الفئات</h2>
-    <p style="font-size: 12px; color: #888; margin-bottom: 12px;">استخدم الأسهم (⬆️ ⬇️) لترتيب ظهور الأقسام أو الأصناف في المنيو:</p>
-    <div id="accordion-container">جاري تحميل البيانات...</div>
-  </div>
-
-  <!-- نافذة تعديل الصنف (بها خيار نقل القسم) -->
-  <div id="edit-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3><i class="fa-solid fa-pen-to-square"></i> تعديل بيانات الصنف ونقله</h3>
-        <button class="close-modal" onclick="closeEditModal()">&times;</button>
-      </div>
-      <input type="hidden" id="edit-cat-idx">
-      <input type="hidden" id="edit-item-idx">
-
-      <div class="form-group">
-        <label style="color:var(--gold); font-weight:bold;">القسم التابع له (يمكنك تغيير القسم لنقل الصنف فوراً):</label>
-        <select id="edit-item-cat"></select>
-      </div>
-
-      <div class="row">
-        <div class="form-group">
-          <label>اسم الصنف (بالعربي)</label>
-          <input type="text" id="edit-name-ar">
-        </div>
-        <div class="form-group">
-          <label>Item Name (English)</label>
-          <input type="text" id="edit-name-en">
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="form-group">
-          <label>وصف الصنف (بالعربي)</label>
-          <textarea id="edit-desc-ar"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Description (English)</label>
-          <textarea id="edit-desc-en"></textarea>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>رابط الصورة (اختياري)</label>
-        <input type="text" id="edit-img">
-      </div>
-
-      <div class="row">
-        <div class="form-group">
-          <label>سعر العضوية (ج.م)</label>
-          <input type="number" id="edit-member-price">
-        </div>
-        <div class="form-group">
-          <label>سعر الزائر (ج.م)</label>
-          <input type="number" id="edit-guest-price">
-        </div>
-      </div>
-
-      <button class="btn" style="background:var(--blue);" onclick="saveEditItem()"><i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات والنقل</button>
-    </div>
-  </div>
-
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
@@ -300,7 +17,14 @@
     let currentMenuData = [];
     let openedCategories = {};
 
-    // الترجمة التلقائية
+    function formatIconDisplay(icon) {
+      if (!icon) return '🍽️';
+      if (typeof icon === 'string' && icon.startsWith('fa-')) {
+        return `<i class="fa-solid ${icon}"></i>`;
+      }
+      return icon;
+    }
+
     async function autoTranslate(text) {
       if (!text || !text.trim()) return '';
       try {
@@ -316,61 +40,72 @@
     document.addEventListener('DOMContentLoaded', () => {
       const catAr = document.getElementById('cat-name-ar');
       const catEn = document.getElementById('cat-name-en');
-      catAr.addEventListener('blur', async () => {
-        if (catAr.value.trim() && !catEn.value.trim()) {
-          catEn.placeholder = "جاري الترجمة...";
-          const trans = await autoTranslate(catAr.value);
-          if (trans) catEn.value = trans;
-          catEn.placeholder = "e.g. Grills";
-        }
-      });
+      if (catAr && catEn) {
+        catAr.addEventListener('blur', async () => {
+          if (catAr.value.trim() && !catEn.value.trim()) {
+            catEn.placeholder = "جاري الترجمة...";
+            const trans = await autoTranslate(catAr.value);
+            if (trans) catEn.value = trans;
+            catEn.placeholder = "e.g. Grills";
+          }
+        });
+      }
 
       const nameAr = document.getElementById('name-ar');
       const nameEn = document.getElementById('name-en');
-      nameAr.addEventListener('blur', async () => {
-        if (nameAr.value.trim() && !nameEn.value.trim()) {
-          nameEn.placeholder = "جاري الترجمة...";
-          const trans = await autoTranslate(nameAr.value);
-          if (trans) nameEn.value = trans;
-          nameEn.placeholder = "e.g. Grilled Kebab";
-        }
-      });
+      if (nameAr && nameEn) {
+        nameAr.addEventListener('blur', async () => {
+          if (nameAr.value.trim() && !nameEn.value.trim()) {
+            nameEn.placeholder = "جاري الترجمة...";
+            const trans = await autoTranslate(nameAr.value);
+            if (trans) nameEn.value = trans;
+            nameEn.placeholder = "e.g. Grilled Kebab";
+          }
+        });
+      }
 
       const descAr = document.getElementById('desc-ar');
       const descEn = document.getElementById('desc-en');
-      descAr.addEventListener('blur', async () => {
-        if (descAr.value.trim() && !descEn.value.trim()) {
-          descEn.placeholder = "جاري الترجمة...";
-          const trans = await autoTranslate(descAr.value);
-          if (trans) descEn.value = trans;
-          descEn.placeholder = "e.g. Charcoal grilled lamb kebab...";
-        }
-      });
+      if (descAr && descEn) {
+        descAr.addEventListener('blur', async () => {
+          if (descAr.value.trim() && !descEn.value.trim()) {
+            descEn.placeholder = "جاري الترجمة...";
+            const trans = await autoTranslate(descAr.value);
+            if (trans) descEn.value = trans;
+            descEn.placeholder = "e.g. Charcoal grilled lamb kebab...";
+          }
+        });
+      }
 
       const editNameAr = document.getElementById('edit-name-ar');
       const editNameEn = document.getElementById('edit-name-en');
-      editNameAr.addEventListener('blur', async () => {
-        if (editNameAr.value.trim() && !editNameEn.value.trim()) {
-          editNameEn.placeholder = "جاري الترجمة...";
-          const trans = await autoTranslate(editNameAr.value);
-          if (trans) editNameEn.value = trans;
-        }
-      });
+      if (editNameAr && editNameEn) {
+        editNameAr.addEventListener('blur', async () => {
+          if (editNameAr.value.trim() && !editNameEn.value.trim()) {
+            editNameEn.placeholder = "جاري الترجمة...";
+            const trans = await autoTranslate(editNameAr.value);
+            if (trans) editNameEn.value = trans;
+          }
+        });
+      }
 
       const editDescAr = document.getElementById('edit-desc-ar');
       const editDescEn = document.getElementById('edit-desc-en');
-      editDescAr.addEventListener('blur', async () => {
-        if (editDescAr.value.trim() && !editDescEn.value.trim()) {
-          editDescEn.placeholder = "جاري الترجمة...";
-          const trans = await autoTranslate(editDescAr.value);
-          if (trans) editDescEn.value = trans;
-        }
-      });
+      if (editDescAr && editDescEn) {
+        editDescAr.addEventListener('blur', async () => {
+          if (editDescAr.value.trim() && !editDescEn.value.trim()) {
+            editDescEn.placeholder = "جاري الترجمة...";
+            const trans = await autoTranslate(editDescAr.value);
+            if (trans) editDescEn.value = trans;
+          }
+        });
+      }
     });
 
+    // رسم الواجهة الأولية فوراً
     renderMenuAccordion();
 
-    // الاستماع المباشر من Firestore
+    // الاستماع المباشر للتغييرات من السيرفر
     db.collection("menu").doc("categories").onSnapshot((doc) => {
       if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
         currentMenuData = doc.data().list;
@@ -380,6 +115,12 @@
       }
       populateCategoriesDropdown();
       renderMenuAccordion();
+    }, (error) => {
+      console.error("Firebase Snapshot Error: ", error);
+      const container = document.getElementById('accordion-container');
+      if (container) {
+        container.innerHTML = '<p style="color:#E74C3C; font-size:13px; text-align:center;">تعذر الاتصال بالسيرفر، تأكد من الإنترنت أو أعد تحميل الصفحة.</p>';
+      }
     });
 
     function populateCategoriesDropdown() {
@@ -397,17 +138,9 @@
         const opt = document.createElement('option');
         opt.value = cat.id;
         const iconDisplay = formatIconDisplay(cat.icon);
-        opt.innerText = `${iconDisplay} ${cat.name_ar} (${cat.name_en || ''})`;
+        opt.innerHTML = `${iconDisplay} ${cat.name_ar} (${cat.name_en || ''})`;
         select.appendChild(opt);
       });
-    }
-
-    function formatIconDisplay(icon) {
-      if (!icon) return '🍽️';
-      if (icon.startsWith('fa-')) {
-        return `<i class="fa-solid ${icon}"></i>`;
-      }
-      return icon; // إيموجي مباشر
     }
 
     function renderMenuAccordion() {
@@ -498,11 +231,196 @@
       }
     }
 
-    // ترتيب الأقسام لأعلى وأسفل
     function moveCategory(index, direction) {
       const newIndex = index + direction;
       if (newIndex < 0 || newIndex >= currentMenuData.length) return;
       const temp = currentMenuData[index];
       currentMenuData[index] = currentMenuData[newIndex];
       currentMenuData[newIndex] = temp;
-      saveToFirebas
+      saveToFirebase();
+    }
+
+    function moveItem(catIdx, itemIdx, direction) {
+      const items = currentMenuData[catIdx].items;
+      const newIndex = itemIdx + direction;
+      if (newIndex < 0 || newIndex >= items.length) return;
+      const temp = items[itemIdx];
+      items[itemIdx] = items[newIndex];
+      items[newIndex] = temp;
+      saveToFirebase();
+    }
+
+    function addCategory() {
+      const nameAr = document.getElementById('cat-name-ar').value.trim();
+      const nameEn = document.getElementById('cat-name-en').value.trim();
+      let icon = document.getElementById('cat-icon').value.trim();
+      if (!icon) icon = '🍽️';
+
+      if (!nameAr) {
+        alert("يرجى إدخال اسم القسم بالعربي");
+        return;
+      }
+      const newCatId = "cat_" + Date.now();
+      const newCat = {
+        id: newCatId,
+        name_ar: nameAr,
+        name_en: nameEn || nameAr,
+        icon: icon,
+        items: []
+      };
+      currentMenuData.push(newCat);
+      openedCategories[newCatId] = true;
+      
+      saveToFirebase(() => {
+        document.getElementById('cat-name-ar').value = '';
+        document.getElementById('cat-name-en').value = '';
+        document.getElementById('cat-icon').value = '🍽️';
+        alert("تمت إضافة القسم الجديد بنجاح!");
+      });
+    }
+
+    function deleteCategory(catIdx) {
+      const catName = currentMenuData[catIdx].name_ar;
+      if (confirm(`هل أنت متأكد من حذف قسم "${catName}" وجميع الأصناف بداخله؟`)) {
+        currentMenuData.splice(catIdx, 1);
+        saveToFirebase(() => {
+          alert(`تم حذف قسم "${catName}" بنجاح!`);
+        });
+      }
+    }
+
+    function addItem() {
+      const catId = document.getElementById('item-cat').value;
+      if (!catId) {
+        alert("يرجى اختيار القسم أولاً");
+        return;
+      }
+      const nameAr = document.getElementById('name-ar').value.trim();
+      const nameEn = document.getElementById('name-en').value.trim();
+      const descAr = document.getElementById('desc-ar').value.trim();
+      const descEn = document.getElementById('desc-en').value.trim();
+      const img = document.getElementById('item-img').value.trim();
+      const mPrice = parseFloat(document.getElementById('member-price').value);
+      const gPrice = parseFloat(document.getElementById('guest-price').value);
+
+      if (!nameAr || isNaN(mPrice) || isNaN(gPrice)) {
+        alert("يرجى ملء الاسم والأسعار المطلوبة");
+        return;
+      }
+
+      const targetCat = currentMenuData.find(c => c.id === catId);
+      if (targetCat) {
+        if (!targetCat.items) targetCat.items = [];
+        targetCat.items.push({
+          name_ar: nameAr,
+          name_en: nameEn || nameAr,
+          desc_ar: descAr,
+          desc_en: descEn,
+          img: img,
+          member_price: mPrice,
+          guest_price: gPrice
+        });
+
+        openedCategories[catId] = true;
+
+        saveToFirebase(() => {
+          document.getElementById('name-ar').value = '';
+          document.getElementById('name-en').value = '';
+          document.getElementById('desc-ar').value = '';
+          document.getElementById('desc-en').value = '';
+          document.getElementById('item-img').value = '';
+          document.getElementById('member-price').value = '';
+          document.getElementById('guest-price').value = '';
+          alert("تم حفظ الصنف بنجاح!");
+        });
+      }
+    }
+
+    function openEditModal(catIdx, itemIdx) {
+      const item = currentMenuData[catIdx].items[itemIdx];
+      document.getElementById('edit-cat-idx').value = catIdx;
+      document.getElementById('edit-item-idx').value = itemIdx;
+
+      const catSelect = document.getElementById('edit-item-cat');
+      catSelect.innerHTML = '';
+      currentMenuData.forEach((cat, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        const iconDisplay = formatIconDisplay(cat.icon);
+        opt.innerHTML = `${iconDisplay} ${cat.name_ar}`;
+        if (idx === catIdx) opt.selected = true;
+        catSelect.appendChild(opt);
+      });
+
+      document.getElementById('edit-name-ar').value = item.name_ar || '';
+      document.getElementById('edit-name-en').value = item.name_en || '';
+      document.getElementById('edit-desc-ar').value = item.desc_ar || '';
+      document.getElementById('edit-desc-en').value = item.desc_en || '';
+      document.getElementById('edit-img').value = item.img || '';
+      document.getElementById('edit-member-price').value = item.member_price;
+      document.getElementById('edit-guest-price').value = item.guest_price;
+      document.getElementById('edit-modal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').style.display = 'none';
+    }
+
+    function saveEditItem() {
+      const oldCatIdx = parseInt(document.getElementById('edit-cat-idx').value);
+      const itemIdx = parseInt(document.getElementById('edit-item-idx').value);
+      const newCatIdx = parseInt(document.getElementById('edit-item-cat').value);
+
+      const nameAr = document.getElementById('edit-name-ar').value.trim();
+      const nameEn = document.getElementById('edit-name-en').value.trim();
+      const descAr = document.getElementById('edit-desc-ar').value.trim();
+      const descEn = document.getElementById('edit-desc-en').value.trim();
+      const img = document.getElementById('edit-img').value.trim();
+      const mPrice = parseFloat(document.getElementById('edit-member-price').value);
+      const gPrice = parseFloat(document.getElementById('edit-guest-price').value);
+
+      if (!nameAr || isNaN(mPrice) || isNaN(gPrice)) {
+        alert("يرجى ملء الاسم والأسعار المطلوبة بشكل صحيح");
+        return;
+      }
+
+      const updatedItem = {
+        name_ar: nameAr,
+        name_en: nameEn || nameAr,
+        desc_ar: descAr,
+        desc_en: descEn,
+        img: img,
+        member_price: mPrice,
+        guest_price: gPrice
+      };
+
+      if (oldCatIdx !== newCatIdx) {
+        currentMenuData[oldCatIdx].items.splice(itemIdx, 1);
+        if (!currentMenuData[newCatIdx].items) currentMenuData[newCatIdx].items = [];
+        currentMenuData[newCatIdx].items.push(updatedItem);
+        openedCategories[currentMenuData[newCatIdx].id] = true;
+      } else {
+        currentMenuData[oldCatIdx].items[itemIdx] = updatedItem;
+      }
+
+      saveToFirebase(() => {
+        closeEditModal();
+        alert("تم تحديث وحفظ الصنف بنجاح!");
+      });
+    }
+
+    function deleteItem(catIdx, itemIdx) {
+      if (confirm("هل تريد حذف هذا الصنف؟")) {
+        currentMenuData[catIdx].items.splice(itemIdx, 1);
+        saveToFirebase();
+      }
+    }
+
+    function saveToFirebase(callback) {
+      db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
+        if (callback) callback();
+      }).catch(err => {
+        alert("خطأ أثناء الحفظ: " + err.message);
+      });
+    }
+  </script>
