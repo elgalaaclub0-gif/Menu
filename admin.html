@@ -1,4 +1,290 @@
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم | منيو نادي الجلاء</title>
+  
+  <script>
+    var pass = prompt("من فضلك أدخل كلمة مرور لوحة التحكم:");
+    if (pass !== "123456") {
+      alert("كلمة المرور غير صحيحة!");
+      window.location.href = "index.html";
+    }
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #A31219;
+      --gold: #DDAA38;
+      --bg: #121214;
+      --card: #1B1B1F;
+      --border: #2C2C32;
+      --blue: #2980B9;
+      --dark-btn: #33333d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+    body { background: var(--bg); color: #fff; padding: 20px 15px; }
+
+    .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+    .header h1 { color: var(--gold); font-size: 22px; }
+    
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; max-width: 680px; margin-inline: auto; }
+    .panel h2 { font-size: 16px; color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 13px; color: #A0A0A8; margin-bottom: 4px; }
+    .form-group input, .form-group select, .form-group textarea { 
+      width: 100%; 
+      padding: 10px; 
+      background: #24242A; 
+      border: 1px solid var(--border); 
+      border-radius: 8px; 
+      color: #fff; 
+      font-size: 14px; 
+      outline: none; 
+    }
+    .form-group textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+    
+    .row { display: flex; gap: 10px; }
+    .row .form-group { flex: 1; }
+    
+    .btn { background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; font-size: 14px; }
+    .btn:hover { background: #BF161E; }
+    
+    .cat-accordion-group {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      background: #1e1e24;
+    }
+    .cat-accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: #25252c;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .cat-accordion-header:hover { background: #2c2c36; }
+    .cat-title-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .cat-title-info i.arrow-icon {
+      font-size: 12px;
+      color: var(--gold);
+      transition: transform 0.3s ease;
+    }
+    .cat-title-info.active i.arrow-icon { transform: rotate(180deg); }
+    .cat-badge {
+      font-size: 11px;
+      background: rgba(221, 170, 56, 0.2);
+      color: var(--gold);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .cat-icon-display {
+      font-size: 18px;
+      margin-inline-end: 4px;
+    }
+    .cat-header-actions { display: flex; align-items: center; gap: 6px; }
+    .cat-body-items {
+      display: none;
+      padding: 10px;
+      background: #18181c;
+      border-top: 1px solid var(--border);
+    }
+    
+    .item-row { display: flex; justify-content: space-between; align-items: center; background: #222228; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #2a2a32; }
+    .actions-box { display: flex; align-items: center; gap: 5px; }
+    .del-btn { background: #E74C3C; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .del-btn:hover { background: #c0392b; }
+    .edit-btn { background: var(--blue); color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .edit-btn:hover { background: #1f618d; }
+    .order-btn { background: var(--dark-btn); color: var(--gold); border: 1px solid var(--border); padding: 5px 9px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .order-btn:hover { background: #444450; color: #fff; }
+    .item-thumb { width: 38px; height: 38px; border-radius: 6px; object-fit: cover; margin-inline-end: 10px; vertical-align: middle; }
+
+    #edit-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      padding: 15px;
+    }
+    .modal-content {
+      background: var(--card);
+      border: 1px solid var(--blue);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .modal-header h3 { color: var(--gold); font-size: 16px; }
+    .close-modal { background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>لوحة إدارة منيو نادي الجلاء</h1>
+    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إدارة كاملة: نقل الأصناف بين الأقسام، الترتيب بالأسهم، وتخصيص الإيموجي</p>
+  </div>
+
+  <!-- إضافة قسم جديد مع إيموجي/أيقونة -->
+  <div class="panel">
+    <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد (Category)</h2>
+    <div class="row">
+      <div class="form-group" style="flex: 2;">
+        <label>اسم القسم بالعربي (مترجم تلقائياً)</label>
+        <input type="text" id="cat-name-ar" placeholder="مثال: مشويات">
+      </div>
+      <div class="form-group" style="flex: 2;">
+        <label>اسم القسم بالإنجليزي</label>
+        <input type="text" id="cat-name-en" placeholder="e.g. Grills">
+      </div>
+      <div class="form-group" style="flex: 1;">
+        <label>الإيموجي / الأيقونة</label>
+        <input type="text" id="cat-icon" placeholder="🍗 أو fa-leaf" value="🍽️">
+      </div>
+    </div>
+    <button class="btn" onclick="addCategory()"><i class="fa-solid fa-plus"></i> إضافة القسم</button>
+  </div>
+
+  <!-- إضافة صنف جديد -->
+  <div class="panel">
+    <h2><i class="fa-solid fa-plus-circle"></i> إضافة صنف جديد للمنيو</h2>
+    
+    <div class="form-group">
+      <label>اختر القسم</label>
+      <select id="item-cat"></select>
+    </div>
+
+    <div class="row">
+      <div class="form-group">
+        <label>اسم الصنف (بالعربي)</label>
+        <input type="text" id="name-ar" placeholder="مثال: كباب مشوي">
+      </div>
+      <div class="form-group">
+        <label>Item Name (English)</label>
+        <input type="text" id="name-en" placeholder="e.g. Grilled Kebab">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="form-group">
+        <label>وصف الصنف (بالعربي) - اختياري</label>
+        <textarea id="desc-ar" placeholder="مثال: كباب ضاني مشوي على الفحم يقدم مع الخضار"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Description (English) - Optional</label>
+        <textarea id="desc-en" placeholder="e.g. Charcoal grilled lamb kebab served with vegetables"></textarea>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>رابط صورة الوجبة (اختياري - اتركه فارغاً إذا لم توجد صورة)</label>
+      <input type="text" id="item-img" placeholder="https://example.com/photo.jpg">
+    </div>
+
+    <div class="row">
+      <div class="form-group">
+        <label>سعر العضوية (ج.م)</label>
+        <input type="number" id="member-price" placeholder="40">
+      </div>
+      <div class="form-group">
+        <label>سعر الزائر (ج.م)</label>
+        <input type="number" id="guest-price" placeholder="50">
+      </div>
+    </div>
+
+    <button class="btn" id="save-btn" onclick="addItem()"><i class="fa-solid fa-check"></i> حفظ الصنف في المنيو</button>
+  </div>
+
+  <!-- عرض الأصناف مقسمة حسب الفئات مع أزرار الترتيب -->
+  <div class="panel">
+    <h2><i class="fa-solid fa-layer-group"></i> الأصناف الحالية مقسمة حسب الفئات</h2>
+    <p style="font-size: 12px; color: #888; margin-bottom: 12px;">استخدم الأسهم (⬆️ ⬇️) لترتيب ظهور الأقسام أو الأصناف في المنيو:</p>
+    <div id="accordion-container">جاري تحميل البيانات...</div>
+  </div>
+
+  <!-- نافذة تعديل الصنف (بها خيار نقل القسم) -->
+  <div id="edit-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-pen-to-square"></i> تعديل بيانات الصنف ونقله</h3>
+        <button class="close-modal" onclick="closeEditModal()">&times;</button>
+      </div>
+      <input type="hidden" id="edit-cat-idx">
+      <input type="hidden" id="edit-item-idx">
+
+      <div class="form-group">
+        <label style="color:var(--gold); font-weight:bold;">القسم التابع له (يمكنك تغيير القسم لنقل الصنف فوراً):</label>
+        <select id="edit-item-cat"></select>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>اسم الصنف (بالعربي)</label>
+          <input type="text" id="edit-name-ar">
+        </div>
+        <div class="form-group">
+          <label>Item Name (English)</label>
+          <input type="text" id="edit-name-en">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>وصف الصنف (بالعربي)</label>
+          <textarea id="edit-desc-ar"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Description (English)</label>
+          <textarea id="edit-desc-en"></textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>رابط الصورة (اختياري)</label>
+        <input type="text" id="edit-img">
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>سعر العضوية (ج.م)</label>
+          <input type="number" id="edit-member-price">
+        </div>
+        <div class="form-group">
+          <label>سعر الزائر (ج.م)</label>
+          <input type="number" id="edit-guest-price">
+        </div>
+      </div>
+
+      <button class="btn" style="background:var(--blue);" onclick="saveEditItem()"><i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات والنقل</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+ <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
