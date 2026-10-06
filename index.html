@@ -45,33 +45,52 @@
 
     header {
       background: linear-gradient(180deg, var(--dark-red) 0%, rgba(18, 18, 20, 0.95) 100%);
-      padding: 24px 16px 16px;
+      padding: 20px 16px 16px;
       text-align: center;
       border-bottom: 1px solid rgba(221, 170, 56, 0.25);
     }
 
     .top-controls {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+    }
+
+    .service-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--accent-gold);
+      color: var(--gold-light);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .service-badge:hover {
+      background: var(--accent-gold);
+      color: #121214;
     }
 
     .lang-btn {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid var(--accent-gold);
       color: var(--accent-gold);
-      padding: 6px 14px;
+      padding: 5px 12px;
       border-radius: 20px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
     }
 
     .logo-container {
-      width: 90px;
-      height: 90px;
-      margin: 0 auto 12px;
+      width: 85px;
+      height: 85px;
+      margin: 0 auto 10px;
       border-radius: 50%;
       padding: 3px;
       background: linear-gradient(135deg, var(--accent-gold), transparent, var(--accent-gold));
@@ -87,7 +106,7 @@
     }
 
     .club-title {
-      font-size: 21px;
+      font-size: 20px;
       font-weight: 800;
       color: var(--gold-light);
       margin-bottom: 4px;
@@ -99,7 +118,7 @@
     }
 
     .pricing-toggle-wrapper {
-      margin: 18px auto 6px;
+      margin: 16px auto 6px;
       max-width: 320px;
       background: rgba(0, 0, 0, 0.45);
       border: 1px solid var(--card-border);
@@ -315,6 +334,12 @@
 
   <header>
     <div class="top-controls">
+      <!-- زر يبين نوع المنيو الحالي ويسمح بالتبديل لو حب الزبون -->
+      <button class="service-badge" id="service-badge-btn" onclick="toggleServiceMode()">
+        <i class="fa-solid fa-utensils" id="service-icon"></i>
+        <span id="service-text">صالة المطعم</span>
+      </button>
+
       <button class="lang-btn" onclick="toggleLanguage()">
         <i class="fa-solid fa-globe"></i>
         <span id="lang-label">English</span>
@@ -325,8 +350,8 @@
       <img src="435341.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/90/A31219/FFFFFF?text=Galaa'">
     </div>
 
-    <h1 class="club-title" id="txt-title">نوادى وفنادق القوات المسلحة</h1>
-    <p class="sub-title" id="txt-sub">قائمة الأطعمة والمشروبات | نادي الجلاء</p>
+    <h1 class="club-title" id="txt-title">نادي وفنادق القوات المسلحة</h1>
+    <p class="sub-title" id="txt-sub">قائمة الأطعمة والمشروبات | صالة المطعم</p>
 
     <div class="pricing-toggle-wrapper">
       <button class="toggle-btn member active" id="btn-member" onclick="setPriceMode('member')">
@@ -371,16 +396,24 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // فحص الرابط: هل هو تيك أواي أم صالة؟
+    const urlParams = new URLSearchParams(window.location.search);
+    let serviceType = urlParams.get('type') === 'takeaway' ? 'takeaway' : 'restaurant';
+
     let menuData = [];
     let currentLang = 'ar';
     let currentPricingMode = 'member';
     let currentFilter = '';
+    let unsubscribeFirestore = null;
 
     const translations = {
       ar: {
         langBtn: "English",
         title: "نادي وفنادق القوات المسلحة",
-        sub: "قائمة الأطعمة والمشروبات | نادي الجلاء",
+        subRestaurant: "قائمة الأطعمة والمشروبات | صالة المطعم",
+        subTakeaway: "قائمة الوجبات السريعة | منفذ التيك أواي",
+        badgeRestaurant: "صالة المطعم 🍽️",
+        badgeTakeaway: "منفذ التيك أواي 🛍️",
         memberBtn: "حاملي العضوية",
         guestBtn: "الزائرين",
         searchPlaceholder: "ابحث عن صنف أو طبق...",
@@ -392,7 +425,10 @@
       en: {
         langBtn: "العربية",
         title: "Armed Forces Clubs & Hotels",
-        sub: "Food & Beverage Menu | Al-Galaa Club",
+        subRestaurant: "Food & Beverage Menu | Dine-in Restaurant",
+        subTakeaway: "Fast Food Menu | Takeaway Outlet",
+        badgeRestaurant: "Dine-in 🍽️",
+        badgeTakeaway: "Takeaway 🛍️",
         memberBtn: "Club Members",
         guestBtn: "Visitors / Guests",
         searchPlaceholder: "Search for dishes...",
@@ -405,10 +441,30 @@
 
     function formatIcon(icon) {
       if (!icon) return '🍽️';
-      if (icon.startsWith('fa-')) {
+      if (typeof icon === 'string' && icon.startsWith('fa-')) {
         return `<i class="fa-solid ${icon}"></i>`;
       }
-      return icon; // إيموجي مباشر
+      return icon;
+    }
+
+    function updateServiceUI() {
+      const t = translations[currentLang];
+      if (serviceType === 'takeaway') {
+        document.getElementById('service-text').innerText = t.badgeTakeaway;
+        document.getElementById('txt-sub').innerText = t.subTakeaway;
+      } else {
+        document.getElementById('service-text').innerText = t.badgeRestaurant;
+        document.getElementById('txt-sub').innerText = t.subRestaurant;
+      }
+    }
+
+    function toggleServiceMode() {
+      serviceType = serviceType === 'restaurant' ? 'takeaway' : 'restaurant';
+      // تحديث الرابط دون إعادة تحميل الصفحة
+      const newUrl = window.location.pathname + '?type=' + serviceType;
+      window.history.replaceState(null, '', newUrl);
+      updateServiceUI();
+      listenToMenuData();
     }
 
     function toggleLanguage() {
@@ -420,12 +476,12 @@
       const t = translations[currentLang];
       document.getElementById('lang-label').innerText = t.langBtn;
       document.getElementById('txt-title').innerText = t.title;
-      document.getElementById('txt-sub').innerText = t.sub;
       document.getElementById('txt-member-btn').innerText = t.memberBtn;
       document.getElementById('txt-guest-btn').innerText = t.guestBtn;
       document.getElementById('search-input').placeholder = t.searchPlaceholder;
       document.getElementById('txt-footer').innerText = t.footer;
 
+      updateServiceUI();
       renderCategories();
       renderMenu();
     }
@@ -459,6 +515,11 @@
       const container = document.getElementById('menu-container');
       const t = translations[currentLang];
       container.innerHTML = '';
+
+      if (menuData.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:#aaa; margin-top:30px;">لا توجد وجبات معروضة في هذا القسم حالياً.</p>`;
+        return;
+      }
 
       menuData.forEach(cat => {
         const filteredItems = (cat.items || []).filter(item => {
@@ -519,15 +580,23 @@
       renderMenu();
     }
 
-    db.collection("menu").doc("categories").onSnapshot((doc) => {
-      if (doc.exists && doc.data().list) {
-        menuData = doc.data().list;
-      } else {
-        menuData = [];
-      }
-      renderCategories();
-      renderMenu();
-    });
+    function listenToMenuData() {
+      if (unsubscribeFirestore) unsubscribeFirestore();
+      
+      const docName = serviceType === 'takeaway' ? 'takeaway_categories' : 'categories';
+      unsubscribeFirestore = db.collection("menu").doc(docName).onSnapshot((doc) => {
+        if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
+          menuData = doc.data().list;
+        } else {
+          menuData = [];
+        }
+        renderCategories();
+        renderMenu();
+      });
+    }
+
+    updateServiceUI();
+    listenToMenuData();
   </script>
 </body>
 </html>
