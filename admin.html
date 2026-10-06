@@ -28,9 +28,42 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
     body { background: var(--bg); color: #fff; padding: 20px 15px; }
 
-    .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+    .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
     .header h1 { color: var(--gold); font-size: 22px; }
     
+    /* تبويبات التبديل بين المطعم والتيك أواي */
+    .menu-type-tabs {
+      display: flex;
+      max-width: 680px;
+      margin: 0 auto 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px;
+      gap: 8px;
+    }
+    .menu-tab-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      color: #A0A0A8;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+    .menu-tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(163, 18, 25, 0.4);
+    }
+
     .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; max-width: 680px; margin-inline: auto; }
     .panel h2 { font-size: 16px; color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
     
@@ -144,12 +177,22 @@
 
   <div class="header">
     <h1>لوحة إدارة منيو نادي الجلاء</h1>
-    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إدارة كاملة: نقل الأصناف بين الأقسام، الترتيب بالأسهم، وتخصيص الإيموجي</p>
+    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إدارة مستقلة لقائمة صالة المطعم ومنفذ التيك أواي</p>
+  </div>
+
+  <!-- أزرار التبديل بين المطعم والتيك أواي -->
+  <div class="menu-type-tabs">
+    <button class="menu-tab-btn active" id="tab-restaurant" onclick="switchMenuMode('restaurant')">
+      <i class="fa-solid fa-utensils"></i> قائمة صالة المطعم
+    </button>
+    <button class="menu-tab-btn" id="tab-takeaway" onclick="switchMenuMode('takeaway')">
+      <i class="fa-solid fa-bag-shopping"></i> قائمة منفذ التيك أواي
+    </button>
   </div>
 
   <!-- إضافة قسم جديد مع إيموجي/أيقونة -->
   <div class="panel">
-    <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد (Category)</h2>
+    <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد إلى (<span id="txt-current-section-cat">صالة المطعم</span>)</h2>
     <div class="row">
       <div class="form-group" style="flex: 2;">
         <label>اسم القسم بالعربي (مترجم تلقائياً)</label>
@@ -169,7 +212,7 @@
 
   <!-- إضافة صنف جديد -->
   <div class="panel">
-    <h2><i class="fa-solid fa-plus-circle"></i> إضافة صنف جديد للمنيو</h2>
+    <h2><i class="fa-solid fa-plus-circle"></i> إضافة صنف جديد إلى (<span id="txt-current-section-item">صالة المطعم</span>)</h2>
     
     <div class="form-group">
       <label>اختر القسم</label>
@@ -219,7 +262,7 @@
 
   <!-- عرض الأصناف مقسمة حسب الفئات مع أزرار الترتيب -->
   <div class="panel">
-    <h2><i class="fa-solid fa-layer-group"></i> الأصناف الحالية مقسمة حسب الفئات</h2>
+    <h2><i class="fa-solid fa-layer-group"></i> الأصناف الحالية (<span id="txt-current-section-list">صالة المطعم</span>)</h2>
     <p style="font-size: 12px; color: #888; margin-bottom: 12px;">استخدم الأسهم (⬆️ ⬇️) لترتيب ظهور الأقسام أو الأصناف في المنيو:</p>
     <div id="accordion-container">جاري تحميل البيانات...</div>
   </div>
@@ -284,9 +327,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
- <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyALAk-3SXOw7kmrwKrGp5cp9o77Nxf9Ufo",
@@ -298,10 +338,15 @@
       measurementId: "G-BH18Y6JBGW"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
+
+    let currentMode = 'restaurant';
     let currentMenuData = [];
     let openedCategories = {};
+    let unsubscribeSnapshot = null;
 
     function formatIconDisplay(icon) {
       if (!icon) return '🍽️';
@@ -388,26 +433,49 @@
       }
     });
 
-    // رسم الواجهة الأولية فوراً
-    renderMenuAccordion();
+    function switchMenuMode(mode) {
+      currentMode = mode;
+      document.getElementById('tab-restaurant').classList.toggle('active', mode === 'restaurant');
+      document.getElementById('tab-takeaway').classList.toggle('active', mode === 'takeaway');
+      
+      const label = mode === 'restaurant' ? 'صالة المطعم' : 'منفذ التيك أواي';
+      document.getElementById('txt-current-section-cat').innerText = label;
+      document.getElementById('txt-current-section-item').innerText = label;
+      document.getElementById('txt-current-section-list').innerText = label;
 
-    // الاستماع المباشر للتغييرات من السيرفر
-    db.collection("menu").doc("categories").onSnapshot((doc) => {
-      if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
-        currentMenuData = doc.data().list;
-      } else {
-        currentMenuData = [];
-        db.collection("menu").doc("categories").set({ list: [] }, { merge: true });
-      }
-      populateCategoriesDropdown();
+      listenToMenuData();
+    }
+
+    function getDocName() {
+      return currentMode === 'takeaway' ? 'takeaway_categories' : 'categories';
+    }
+
+    function listenToMenuData() {
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+      
+      const docName = getDocName();
       renderMenuAccordion();
-    }, (error) => {
-      console.error("Firebase Snapshot Error: ", error);
-      const container = document.getElementById('accordion-container');
-      if (container) {
-        container.innerHTML = '<p style="color:#E74C3C; font-size:13px; text-align:center;">تعذر الاتصال بالسيرفر، تأكد من الإنترنت أو أعد تحميل الصفحة.</p>';
-      }
-    });
+
+      unsubscribeSnapshot = db.collection("menu").doc(docName).onSnapshot((doc) => {
+        if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
+          currentMenuData = doc.data().list;
+        } else {
+          currentMenuData = [];
+          db.collection("menu").doc(docName).set({ list: [] }, { merge: true });
+        }
+        populateCategoriesDropdown();
+        renderMenuAccordion();
+      }, (error) => {
+        console.error("Firebase Snapshot Error: ", error);
+        const container = document.getElementById('accordion-container');
+        if (container) {
+          container.innerHTML = '<p style="color:#E74C3C; font-size:13px; text-align:center;">تعذر الاتصال بالسيرفر، تأكد من الإنترنت أو أعد تحميل الصفحة.</p>';
+        }
+      });
+    }
+
+    // بدء الاستماع الفوري
+    listenToMenuData();
 
     function populateCategoriesDropdown() {
       const select = document.getElementById('item-cat');
@@ -435,7 +503,7 @@
       container.innerHTML = '';
 
       if (currentMenuData.length === 0) {
-        container.innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام حالياً. استخدم النموذج بالأعلى لإضافة أول قسم.</p>';
+        container.innerHTML = `<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام في (${currentMode === 'restaurant' ? 'صالة المطعم' : 'التيك أواي'}) حالياً. استخدم النموذج بالأعلى لإضافة أول قسم.</p>`;
         return;
       }
 
@@ -632,8 +700,7 @@
       currentMenuData.forEach((cat, idx) => {
         const opt = document.createElement('option');
         opt.value = idx;
-        const iconDisplay = formatIconDisplay(cat.icon);
-        opt.innerHTML = `${iconDisplay} ${cat.name_ar}`;
+        opt.innerText = `${formatIconDisplay(cat.icon)} ${cat.name_ar}`;
         if (idx === catIdx) opt.selected = true;
         catSelect.appendChild(opt);
       });
@@ -658,9 +725,9 @@
       const newCatIdx = parseInt(document.getElementById('edit-item-cat').value);
 
       const nameAr = document.getElementById('edit-name-ar').value.trim();
-      const nameEn = document.getElementById('edit-name-en').value.trim();
-      const descAr = document.getElementById('edit-desc-ar').value.trim();
-      const descEn = document.getElementById('edit-desc-en').value.trim();
+      const nameEn = document.getElementById('name-en').value.trim();
+      const descAr = document.getElementById('desc-ar').value.trim();
+      const descEn = document.getElementById('desc-en').value.trim();
       const img = document.getElementById('edit-img').value.trim();
       const mPrice = parseFloat(document.getElementById('edit-member-price').value);
       const gPrice = parseFloat(document.getElementById('edit-guest-price').value);
@@ -703,10 +770,13 @@
     }
 
     function saveToFirebase(callback) {
-      db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
+      const docName = getDocName();
+      db.collection("menu").doc(docName).set({ list: currentMenuData }).then(() => {
         if (callback) callback();
       }).catch(err => {
         alert("خطأ أثناء الحفظ: " + err.message);
       });
     }
   </script>
+</body>
+</html>
