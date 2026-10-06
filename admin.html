@@ -208,7 +208,6 @@
     .close-modal { background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer; }
   </style>
 
-  <!-- كود الدخول محطوط فوق ومستقل تماماً لضمان التشغيل الفوري -->
   <script>
     function doLogin() {
       var input = document.getElementById('pass-field');
@@ -219,7 +218,6 @@
       if (!input) return;
       var val = input.value.trim();
 
-      // تحويل الأرقام العربية إلى إنجليزية تلقائياً لو الكيبورد عربي
       val = val.replace(/[٠-٩]/g, function(d) {
         return "٠١٢٣٤٥٦٧٨٩".indexOf(d);
       });
@@ -228,9 +226,8 @@
         err.style.display = 'none';
         lock.style.display = 'none';
         main.style.display = 'block';
-        if (typeof initFirebase === 'function') {
-          initFirebase();
-        }
+        // بدء التشغيل الفوري
+        initFirebase();
       } else {
         err.style.display = 'block';
         input.value = '';
@@ -344,7 +341,7 @@
     <div class="panel">
       <h2><i class="fa-solid fa-layer-group"></i> الأصناف الحالية (<span id="txt-current-section-list">صالة المطعم</span>)</h2>
       <p style="font-size: 12px; color: #888; margin-bottom: 12px;">استخدم الأسهم (⬆️ ⬇️) لترتيب ظهور الأقسام أو الأصناف في المنيو:</p>
-      <div id="accordion-container">جاري تحميل البيانات...</div>
+      <div id="accordion-container"></div>
     </div>
   </div>
 
@@ -413,6 +410,7 @@
     var currentMenuData = [];
     var openedCategories = {};
     var db = null;
+    var unsub = null;
 
     function initFirebase() {
       try {
@@ -431,6 +429,11 @@
       } catch (e) {
         console.error("Firebase err:", e);
       }
+
+      // رسم فوري مباشر للواجهة قبل انتظار الرد لمنع أي تعليق
+      populateCategoriesDropdown();
+      renderMenuAccordion();
+
       loadMenuData();
     }
 
@@ -464,6 +467,11 @@
       document.getElementById('txt-current-section-item').innerText = label;
       document.getElementById('txt-current-section-list').innerText = label;
 
+      // تصفير مؤقت ورسم فوري
+      currentMenuData = [];
+      populateCategoriesDropdown();
+      renderMenuAccordion();
+
       loadMenuData();
     }
 
@@ -472,20 +480,12 @@
     }
 
     function loadMenuData() {
-      var container = document.getElementById('accordion-container');
-      if (container) {
-        container.innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">جاري تحميل البيانات...</p>';
-      }
-
-      if (!db) {
-        currentMenuData = [];
-        populateCategoriesDropdown();
-        renderMenuAccordion();
-        return;
-      }
+      if (unsub) unsub();
+      if (!db) return;
 
       var docName = getDocName();
-      db.collection("menu").doc(docName).get().then(function(doc) {
+
+      unsub = db.collection("menu").doc(docName).onSnapshot(function(doc) {
         if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
           currentMenuData = doc.data().list;
         } else {
@@ -493,9 +493,8 @@
         }
         populateCategoriesDropdown();
         renderMenuAccordion();
-      }).catch(function(err) {
-        console.error("Load err:", err);
-        currentMenuData = [];
+      }, function(err) {
+        console.error("Snapshot error:", err);
         populateCategoriesDropdown();
         renderMenuAccordion();
       });
@@ -526,7 +525,7 @@
       container.innerHTML = '';
 
       if (!currentMenuData || currentMenuData.length === 0) {
-        container.innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام في (' + (currentMode === 'restaurant' ? 'صالة المطعم' : 'التيك أواي') + ') حالياً. استخدم النموذج بالأعلى لإضافة أول قسم.</p>';
+        container.innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام في (' + (currentMode === 'restaurant' ? 'صالة المطعم' : 'التيك أواي') + ') حالياً. أضف قسماً من النموذج بالأعلى.</p>';
         return;
       }
 
@@ -553,4 +552,6 @@
             '<span class="cat-badge">' + items.length + ' صنف</span>' +
           '</div>' +
           '<div class="cat-header-actions cat-btn-action">' +
-            '<button class="order-btn" onclick="moveCategory(' + catIdx + ', -1)" title="تحريك لأعلى"><i c
+            '<button class="order-btn" onclick="moveCategory(' + catIdx + ', -1)" title="تحريك لأعلى"><i class="fa-solid fa-arrow-up"></i></button>' +
+            '<button class="order-btn" onclick="moveCategory(' + catIdx + ', 1)" title="تحريك لأسفل"><i class="fa-solid fa-arrow-down"></i></button>' +
+            '<button class="del-btn" onclick="deleteCategory(' + catIdx + '
