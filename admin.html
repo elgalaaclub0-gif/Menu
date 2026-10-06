@@ -20,26 +20,29 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
     body { background: var(--bg); color: #fff; padding: 20px 15px; }
 
-    /* شاشة تسجيل الدخول الإجبارية */
+    /* شاشة تسجيل الدخول */
     #lock-screen {
       position: fixed;
-      inset: 0;
-      background: var(--bg);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #121214;
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 99999;
+      z-index: 999999;
       padding: 15px;
     }
     .lock-box {
-      background: var(--card);
+      background: #1B1B1F;
       border: 1px solid var(--gold);
       border-radius: 14px;
       padding: 30px 20px;
       max-width: 380px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.8);
     }
     .lock-box i.fa-lock {
       font-size: 40px;
@@ -59,9 +62,9 @@
       outline: none;
     }
     .lock-box input:focus { border-color: var(--gold); }
-    .lock-error { color: #E74C3C; font-size: 13px; display: none; margin-bottom: 10px; }
+    .lock-error { color: #E74C3C; font-size: 13px; display: none; margin-bottom: 10px; font-weight: bold; }
 
-    /* واجهة لوحة التحكم */
+    /* لوحة التحكم */
     #main-panel { display: none; }
     .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
     .header h1 { color: var(--gold); font-size: 22px; }
@@ -209,19 +212,19 @@
 </head>
 <body>
 
-  <!-- شاشة الدخول الثابتة -->
+  <!-- شاشة الدخول -->
   <div id="lock-screen">
     <div class="lock-box">
       <i class="fa-solid fa-lock"></i>
       <h2 style="font-size: 18px; margin-bottom: 6px;">لوحة تحكم نادي الجلاء</h2>
       <p style="font-size: 12px; color: #A0A0A8;">من فضلك أدخل كلمة المرور للدخول</p>
-      <input type="password" id="pass-field" placeholder="كلمة المرور..." onkeydown="if(event.key==='Enter') unlockAdmin()">
+      <input type="password" id="pass-field" placeholder="كلمة المرور..." autocomplete="off">
       <div id="lock-err" class="lock-error">كلمة المرور غير صحيحة!</div>
-      <button class="btn" onclick="unlockAdmin()"><i class="fa-solid fa-arrow-right-to-bracket"></i> دخول</button>
+      <button class="btn" id="login-submit-btn" type="button"><i class="fa-solid fa-arrow-right-to-bracket"></i> دخول</button>
     </div>
   </div>
 
-  <!-- لوحة الإدارة الأساسية -->
+  <!-- المحتوى الرئيسي -->
   <div id="main-panel">
     <div class="header">
       <h1>لوحة إدارة منيو نادي الجلاء</h1>
@@ -377,19 +380,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
-    // تسجيل الدخول بالباسورد 123456
-    function unlockAdmin() {
-      const pass = document.getElementById('pass-field').value.trim();
-      if (pass === "123456") {
-        document.getElementById('lock-screen').style.display = 'none';
-        document.getElementById('main-panel').style.display = 'block';
-        initApp();
-      } else {
-        document.getElementById('lock-err').style.display = 'block';
-        document.getElementById('pass-field').value = '';
-      }
-    }
-
+    // 1. إعداد الفايربيس من البداية
     const firebaseConfig = {
       apiKey: "AIzaSyALAk-3SXOw7kmrwKrGp5cp9o77Nxf9Ufo",
       authDomain: "galaa-menu.firebaseapp.com",
@@ -400,18 +391,34 @@
       measurementId: "G-BH18Y6JBGW"
     };
 
-    let db;
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
     let currentMode = 'restaurant';
     let currentMenuData = [];
     let openedCategories = {};
 
-    function initApp() {
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
+    // 2. فحص كلمة المرور المباشر بدون أي تعليق
+    function doLogin() {
+      const pass = document.getElementById('pass-field').value.trim();
+      if (pass === "123456") {
+        document.getElementById('lock-err').style.display = 'none';
+        document.getElementById('lock-screen').style.setProperty('display', 'none', 'important');
+        document.getElementById('main-panel').style.setProperty('display', 'block', 'important');
+        loadMenuData();
+      } else {
+        document.getElementById('lock-err').style.display = 'block';
+        document.getElementById('pass-field').value = '';
+        document.getElementById('pass-field').focus();
       }
-      db = firebase.firestore();
-      loadMenuData();
     }
+
+    document.getElementById('login-submit-btn').addEventListener('click', doLogin);
+    document.getElementById('pass-field').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doLogin();
+    });
 
     function formatIconDisplay(icon) {
       if (!icon) return '🍽️';
@@ -450,21 +457,25 @@
       return currentMode === 'takeaway' ? 'takeaway_categories' : 'categories';
     }
 
-    // جلب البيانات بدون تعليق
+    // جلب البيانات مع رسم فوري دون تعليق
     function loadMenuData() {
       const docName = getDocName();
-      document.getElementById('accordion-container').innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">جاري تحميل البيانات...</p>';
+      const container = document.getElementById('accordion-container');
+      if (container) {
+        container.innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">جاري تحميل البيانات...</p>';
+      }
 
       db.collection("menu").doc(docName).get().then((doc) => {
         if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
           currentMenuData = doc.data().list;
         } else {
           currentMenuData = [];
+          db.collection("menu").doc(docName).set({ list: [] }, { merge: true });
         }
         populateCategoriesDropdown();
         renderMenuAccordion();
       }).catch((err) => {
-        console.error(err);
+        console.error("Firebase Error:", err);
         currentMenuData = [];
         populateCategoriesDropdown();
         renderMenuAccordion();
@@ -526,17 +537,4 @@
           <div class="cat-header-actions cat-btn-action">
             <button class="order-btn" onclick="moveCategory(${catIdx}, -1)" title="تحريك لأعلى"><i class="fa-solid fa-arrow-up"></i></button>
             <button class="order-btn" onclick="moveCategory(${catIdx}, 1)" title="تحريك لأسفل"><i class="fa-solid fa-arrow-down"></i></button>
-            <button class="del-btn" onclick="deleteCategory(${catIdx})" title="حذف هذا القسم"><i class="fa-solid fa-trash"></i> حذف</button>
-          </div>
-        `;
-
-        const body = document.createElement('div');
-        body.className = 'cat-body-items';
-        body.id = `cat-body-${cat.id}`;
-        body.style.display = isOpened ? 'block' : 'none';
-
-        if (items.length === 0) {
-          body.innerHTML = '<p style="color:#888; font-size:12px; text-align:center; padding:8px;">لا توجد أصناف في هذا القسم بعد.</p>';
-        } else {
-          items.forEach((item, itemIdx) => {
-            const row
+            <button class="del-btn" onclick="de
