@@ -7,6 +7,7 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
     :root {
       --primary: #A31219;
@@ -23,10 +24,7 @@
     /* شاشة القفل */
     #lock-screen {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      inset: 0;
       background: #121214;
       display: flex;
       justify-content: center;
@@ -209,6 +207,37 @@
     .modal-header h3 { color: var(--gold); font-size: 16px; }
     .close-modal { background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer; }
   </style>
+
+  <!-- كود الدخول محطوط فوق ومستقل تماماً لضمان التشغيل الفوري -->
+  <script>
+    function doLogin() {
+      var input = document.getElementById('pass-field');
+      var err = document.getElementById('lock-err');
+      var lock = document.getElementById('lock-screen');
+      var main = document.getElementById('main-panel');
+
+      if (!input) return;
+      var val = input.value.trim();
+
+      // تحويل الأرقام العربية إلى إنجليزية تلقائياً لو الكيبورد عربي
+      val = val.replace(/[٠-٩]/g, function(d) {
+        return "٠١٢٣٤٥٦٧٨٩".indexOf(d);
+      });
+
+      if (val === "123456") {
+        err.style.display = 'none';
+        lock.style.display = 'none';
+        main.style.display = 'block';
+        if (typeof initFirebase === 'function') {
+          initFirebase();
+        }
+      } else {
+        err.style.display = 'block';
+        input.value = '';
+        input.focus();
+      }
+    }
+  </script>
 </head>
 <body>
 
@@ -217,7 +246,7 @@
     <div class="lock-box">
       <i class="fa-solid fa-lock"></i>
       <h2 style="font-size: 18px; margin-bottom: 6px;">لوحة تحكم نادي الجلاء</h2>
-      <p style="font-size: 12px; color: #A0A0A8;">أدخل كلمة المرور للمتابعة</p>
+      <p style="font-size: 12px; color: #A0A0A8;">أدخل كلمة المرور (123456)</p>
       <input type="password" id="pass-field" placeholder="كلمة المرور..." onkeydown="if(event.key==='Enter') doLogin()">
       <div id="lock-err" class="lock-error">كلمة المرور غير صحيحة!</div>
       <button class="btn" type="button" onclick="doLogin()"><i class="fa-solid fa-arrow-right-to-bracket"></i> دخول</button>
@@ -376,7 +405,6 @@
     </div>
   </div>
 
-  <!-- سكريبتات الفايربيس -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -385,27 +413,6 @@
     var currentMenuData = [];
     var openedCategories = {};
     var db = null;
-
-    // دالة الدخول الصريحة
-    function doLogin() {
-      var passInput = document.getElementById('pass-field');
-      var lockErr = document.getElementById('lock-err');
-      var lockScreen = document.getElementById('lock-screen');
-      var mainPanel = document.getElementById('main-panel');
-
-      if (!passInput) return;
-
-      if (passInput.value.trim() === "123456") {
-        lockErr.style.display = 'none';
-        lockScreen.style.display = 'none';
-        mainPanel.style.display = 'block';
-        initFirebase();
-      } else {
-        lockErr.style.display = 'block';
-        passInput.value = '';
-        passInput.focus();
-      }
-    }
 
     function initFirebase() {
       try {
@@ -422,7 +429,7 @@
         }
         db = firebase.firestore();
       } catch (e) {
-        console.error("Firebase init err:", e);
+        console.error("Firebase err:", e);
       }
       loadMenuData();
     }
@@ -546,5 +553,4 @@
             '<span class="cat-badge">' + items.length + ' صنف</span>' +
           '</div>' +
           '<div class="cat-header-actions cat-btn-action">' +
-            '<button class="order-btn" onclick="moveCategory(' + catIdx + ', -1)" title="تحريك لأعلى"><i class="fa-solid fa-arrow-up"></i></button>' +
-            '<button class="order-btn" onclick="moveCategory(' + catIdx + ', 1)" title="تحريك لأسفل"><i class="fa-solid fa-arrow-d
+            '<button class="order-btn" onclick="moveCategory(' + catIdx + ', -1)" title="تحريك لأعلى"><i c
