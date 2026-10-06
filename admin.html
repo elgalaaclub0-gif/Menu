@@ -4,14 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم | منيو نادي الجلاء</title>
-  
-  <script>
-    var pass = prompt("من فضلك أدخل كلمة مرور لوحة التحكم:");
-    if (pass !== "123456") {
-      alert("كلمة المرور غير صحيحة!");
-      window.location.href = "index.html";
-    }
-  </script>
 
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -31,7 +23,6 @@
     .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
     .header h1 { color: var(--gold); font-size: 22px; }
     
-    /* تبويبات اختيار نوع المنيو (مطعم / تيك أواي) */
     .menu-type-tabs {
       display: flex;
       max-width: 680px;
@@ -180,7 +171,7 @@
     <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إدارة مستقلة لقائمة صالة المطعم ومنفذ التيك أواي</p>
   </div>
 
-  <!-- تبويبات التبديل بين المطعم والتيك أواي -->
+  <!-- تبويبات التبديل -->
   <div class="menu-type-tabs">
     <button class="menu-tab-btn active" id="tab-restaurant" onclick="switchMenuMode('restaurant')">
       <i class="fa-solid fa-utensils"></i> قائمة صالة المطعم
@@ -196,15 +187,15 @@
     <div class="row">
       <div class="form-group" style="flex: 2;">
         <label>اسم القسم بالعربي (مترجم تلقائياً)</label>
-        <input type="text" id="cat-name-ar" placeholder="مثال: ساندوتشات تيك أواي">
+        <input type="text" id="cat-name-ar" placeholder="مثال: مشويات">
       </div>
       <div class="form-group" style="flex: 2;">
         <label>اسم القسم بالإنجليزي</label>
-        <input type="text" id="cat-name-en" placeholder="e.g. Sandwiches">
+        <input type="text" id="cat-name-en" placeholder="e.g. Grills">
       </div>
       <div class="form-group" style="flex: 1;">
         <label>الإيموجي</label>
-        <input type="text" id="cat-icon" placeholder="🍔" value="🍽️">
+        <input type="text" id="cat-icon" placeholder="🍗" value="🍽️">
       </div>
     </div>
     <button class="btn" onclick="addCategory()"><i class="fa-solid fa-plus"></i> إضافة القسم</button>
@@ -222,22 +213,22 @@
     <div class="row">
       <div class="form-group">
         <label>اسم الصنف (بالعربي)</label>
-        <input type="text" id="name-ar" placeholder="مثال: برجر دجاج عائلي">
+        <input type="text" id="name-ar" placeholder="مثال: كباب مشوي">
       </div>
       <div class="form-group">
         <label>Item Name (English)</label>
-        <input type="text" id="name-en" placeholder="e.g. Chicken Burger">
+        <input type="text" id="name-en" placeholder="e.g. Grilled Kebab">
       </div>
     </div>
 
     <div class="row">
       <div class="form-group">
         <label>وصف الصنف (بالعربي) - اختياري</label>
-        <textarea id="desc-ar" placeholder="مثال: يقدم مع بطاطس وصوص خاص"></textarea>
+        <textarea id="desc-ar" placeholder="مثال: يقدم مع أرز وخضار مشوي"></textarea>
       </div>
       <div class="form-group">
         <label>Description (English) - Optional</label>
-        <textarea id="desc-en" placeholder="e.g. Served with french fries and special sauce"></textarea>
+        <textarea id="desc-en" placeholder="e.g. Served with rice and grilled vegetables"></textarea>
       </div>
     </div>
 
@@ -328,6 +319,19 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
+    // طلب الباسورد بدون كسر الـ DOM
+    (function authCheck() {
+      if (sessionStorage.getItem('galaa_auth') !== 'ok') {
+        var p = prompt("من فضلك أدخل كلمة مرور لوحة التحكم:");
+        if (p === "123456") {
+          sessionStorage.setItem('galaa_auth', 'ok');
+        } else {
+          alert("كلمة المرور غير صحيحة!");
+          window.location.href = "index.html";
+        }
+      }
+    })();
+
     const firebaseConfig = {
       apiKey: "AIzaSyALAk-3SXOw7kmrwKrGp5cp9o77Nxf9Ufo",
       authDomain: "galaa-menu.firebaseapp.com",
@@ -338,10 +342,12 @@
       measurementId: "G-BH18Y6JBGW"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
 
-    let currentMode = 'restaurant'; // أو 'takeaway'
+    let currentMode = 'restaurant';
     let currentMenuData = [];
     let openedCategories = {};
     let unsubscribeSnapshot = null;
@@ -366,74 +372,6 @@
       return '';
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const catAr = document.getElementById('cat-name-ar');
-      const catEn = document.getElementById('cat-name-en');
-      if (catAr && catEn) {
-        catAr.addEventListener('blur', async () => {
-          if (catAr.value.trim() && !catEn.value.trim()) {
-            catEn.placeholder = "جاري الترجمة...";
-            const trans = await autoTranslate(catAr.value);
-            if (trans) catEn.value = trans;
-            catEn.placeholder = "e.g. Grills";
-          }
-        });
-      }
-
-      const nameAr = document.getElementById('name-ar');
-      const nameEn = document.getElementById('name-en');
-      if (nameAr && nameEn) {
-        nameAr.addEventListener('blur', async () => {
-          if (nameAr.value.trim() && !nameEn.value.trim()) {
-            nameEn.placeholder = "جاري الترجمة...";
-            const trans = await autoTranslate(nameAr.value);
-            if (trans) nameEn.value = trans;
-            nameEn.placeholder = "e.g. Grilled Kebab";
-          }
-        });
-      }
-
-      const descAr = document.getElementById('desc-ar');
-      const descEn = document.getElementById('desc-en');
-      if (descAr && descEn) {
-        descAr.addEventListener('blur', async () => {
-          if (descAr.value.trim() && !descEn.value.trim()) {
-            descEn.placeholder = "جاري الترجمة...";
-            const trans = await autoTranslate(descAr.value);
-            if (trans) descEn.value = trans;
-            descEn.placeholder = "e.g. Served with french fries...";
-          }
-        });
-      }
-
-      const editNameAr = document.getElementById('edit-name-ar');
-      const editNameEn = document.getElementById('edit-name-en');
-      if (editNameAr && editNameEn) {
-        editNameAr.addEventListener('blur', async () => {
-          if (editNameAr.value.trim() && !editNameEn.value.trim()) {
-            editNameEn.placeholder = "جاري الترجمة...";
-            const trans = await autoTranslate(editNameAr.value);
-            if (trans) editNameEn.value = trans;
-          }
-        });
-      }
-
-      const editDescAr = document.getElementById('edit-desc-ar');
-      const editDescEn = document.getElementById('edit-desc-en');
-      if (editDescAr && editDescEn) {
-        editDescAr.addEventListener('blur', async () => {
-          if (editDescAr.value.trim() && !editDescEn.value.trim()) {
-            editDescEn.placeholder = "جاري الترجمة...";
-            const trans = await autoTranslate(editDescAr.value);
-            if (trans) editDescEn.value = trans;
-          }
-        });
-      }
-
-      listenToMenuData();
-    });
-
-    // التبديل بين قائمة المطعم وقائمة التيك أواي
     function switchMenuMode(mode) {
       currentMode = mode;
       document.getElementById('tab-restaurant').classList.toggle('active', mode === 'restaurant');
@@ -452,9 +390,15 @@
     }
 
     function listenToMenuData() {
-      if (unsubscribeSnapshot) unsubscribeSnapshot();
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+      }
       
       const docName = getDocName();
+      
+      // مسح الواجهة فوراً لحين تحميل بيانات الوضع الجديد
+      renderMenuAccordion();
+
       unsubscribeSnapshot = db.collection("menu").doc(docName).onSnapshot((doc) => {
         if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
           currentMenuData = doc.data().list;
@@ -466,6 +410,10 @@
         renderMenuAccordion();
       }, (error) => {
         console.error("Firebase Snapshot Error: ", error);
+        const container = document.getElementById('accordion-container');
+        if (container) {
+          container.innerHTML = '<p style="color:#E74C3C; font-size:13px; text-align:center;">تعذر الاتصال بقاعدة البيانات. جاري إعادة المحاولة...</p>';
+        }
       });
     }
 
@@ -473,7 +421,7 @@
       const select = document.getElementById('item-cat');
       if (!select) return;
       select.innerHTML = '';
-      if (currentMenuData.length === 0) {
+      if (!currentMenuData || currentMenuData.length === 0) {
         const opt = document.createElement('option');
         opt.value = '';
         opt.innerText = 'يرجى إضافة قسم أولاً';
@@ -494,8 +442,8 @@
       if (!container) return;
       container.innerHTML = '';
 
-      if (currentMenuData.length === 0) {
-        container.innerHTML = `<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام في (${currentMode === 'restaurant' ? 'صالة المطعم' : 'التيك أواي'}) حالياً.</p>`;
+      if (!currentMenuData || currentMenuData.length === 0) {
+        container.innerHTML = `<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام في (${currentMode === 'restaurant' ? 'صالة المطعم' : 'التيك أواي'}) حالياً. استخدم النموذج بالأعلى لإضافة أول قسم.</p>`;
         return;
       }
 
@@ -531,4 +479,43 @@
         const body = document.createElement('div');
         body.className = 'cat-body-items';
         body.id = `cat-body-${cat.id}`;
-        body.style.disp
+        body.style.display = isOpened ? 'block' : 'none';
+
+        if (items.length === 0) {
+          body.innerHTML = '<p style="color:#888; font-size:12px; text-align:center; padding:8px;">لا توجد أصناف في هذا القسم بعد.</p>';
+        } else {
+          items.forEach((item, itemIdx) => {
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            const thumb = (item.img && item.img.trim() !== '') ? `<img src="${item.img}" class="item-thumb" onerror="this.style.display='none'">` : '';
+            
+            row.innerHTML = `
+              <div>
+                ${thumb}
+                <strong>${item.name_ar}</strong> - <span style="color:#aaa;">${item.name_en || ''}</span><br>
+                <span style="font-size: 11px; color: #888;">${item.desc_ar || 'بدون وصف'}</span><br>
+                <span style="font-size: 11px; color: var(--gold);">عضو: ${item.member_price} ج.م | زائر: ${item.guest_price} ج.م</span>
+              </div>
+              <div class="actions-box">
+                <button class="order-btn" onclick="moveItem(${catIdx}, ${itemIdx}, -1)" title="تحريك لأعلى"><i class="fa-solid fa-arrow-up"></i></button>
+                <button class="order-btn" onclick="moveItem(${catIdx}, ${itemIdx}, 1)" title="تحريك لأسفل"><i class="fa-solid fa-arrow-down"></i></button>
+                <button class="edit-btn" onclick="openEditModal(${catIdx}, ${itemIdx})"><i class="fa-solid fa-pen"></i> تعديل / نقل</button>
+                <button class="del-btn" onclick="deleteItem(${catIdx}, ${itemIdx})"><i class="fa-solid fa-trash"></i> حذف</button>
+              </div>
+            `;
+            body.appendChild(row);
+          });
+        }
+
+        group.appendChild(header);
+        group.appendChild(body);
+        container.appendChild(group);
+      });
+    }
+
+    function toggleCategoryAccordion(catId) {
+      openedCategories[catId] = !openedCategories[catId];
+      const body = document.getElementById(`cat-body-${catId}`);
+      const titleInfo = document.getElementById(`title-info-${catId}`);
+      if (body) {
+        const
