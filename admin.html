@@ -28,41 +28,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
     body { background: var(--bg); color: #fff; padding: 20px 15px; }
 
-    .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+    .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
     .header h1 { color: var(--gold); font-size: 22px; }
     
-    .menu-type-tabs {
-      display: flex;
-      max-width: 680px;
-      margin: 0 auto 20px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 6px;
-      gap: 8px;
-    }
-    .menu-tab-btn {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      background: transparent;
-      color: #A0A0A8;
-      font-size: 15px;
-      font-weight: 700;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.25s ease;
-    }
-    .menu-tab-btn.active {
-      background: var(--primary);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(163, 18, 25, 0.4);
-    }
-
     .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; max-width: 680px; margin-inline: auto; }
     .panel h2 { font-size: 16px; color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
     
@@ -112,7 +80,11 @@
       font-weight: 700;
       color: #fff;
     }
-    .cat-title-info i.arrow-icon { font-size: 12px; color: var(--gold); transition: transform 0.3s ease; }
+    .cat-title-info i.arrow-icon {
+      font-size: 12px;
+      color: var(--gold);
+      transition: transform 0.3s ease;
+    }
     .cat-title-info.active i.arrow-icon { transform: rotate(180deg); }
     .cat-badge {
       font-size: 11px;
@@ -121,7 +93,10 @@
       padding: 2px 8px;
       border-radius: 10px;
     }
-    .cat-icon-display { font-size: 18px; margin-inline-end: 4px; }
+    .cat-icon-display {
+      font-size: 18px;
+      margin-inline-end: 4px;
+    }
     .cat-header-actions { display: flex; align-items: center; gap: 6px; }
     .cat-body-items {
       display: none;
@@ -169,21 +144,12 @@
 
   <div class="header">
     <h1>لوحة إدارة منيو نادي الجلاء</h1>
-    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إدارة مستقلة لقائمة صالة المطعم ومنفذ التيك أواي</p>
+    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إدارة كاملة: نقل الأصناف بين الأقسام، الترتيب بالأسهم، وتخصيص الإيموجي</p>
   </div>
 
-  <div class="menu-type-tabs">
-    <button class="menu-tab-btn active" id="tab-restaurant" onclick="switchMenuMode('restaurant')">
-      <i class="fa-solid fa-utensils"></i> قائمة صالة المطعم
-    </button>
-    <button class="menu-tab-btn" id="tab-takeaway" onclick="switchMenuMode('takeaway')">
-      <i class="fa-solid fa-bag-shopping"></i> قائمة منفذ التيك أواي
-    </button>
-  </div>
-
-  <!-- إضافة قسم جديد -->
+  <!-- إضافة قسم جديد مع إيموجي/أيقونة -->
   <div class="panel">
-    <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد إلى (<span id="txt-current-section-cat">صالة المطعم</span>)</h2>
+    <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد (Category)</h2>
     <div class="row">
       <div class="form-group" style="flex: 2;">
         <label>اسم القسم بالعربي (مترجم تلقائياً)</label>
@@ -194,8 +160,8 @@
         <input type="text" id="cat-name-en" placeholder="e.g. Grills">
       </div>
       <div class="form-group" style="flex: 1;">
-        <label>الإيموجي</label>
-        <input type="text" id="cat-icon" placeholder="🍗" value="🍽️">
+        <label>الإيموجي / الأيقونة</label>
+        <input type="text" id="cat-icon" placeholder="🍗 أو fa-leaf" value="🍽️">
       </div>
     </div>
     <button class="btn" onclick="addCategory()"><i class="fa-solid fa-plus"></i> إضافة القسم</button>
@@ -203,7 +169,7 @@
 
   <!-- إضافة صنف جديد -->
   <div class="panel">
-    <h2><i class="fa-solid fa-plus-circle"></i> إضافة صنف جديد إلى (<span id="txt-current-section-item">صالة المطعم</span>)</h2>
+    <h2><i class="fa-solid fa-plus-circle"></i> إضافة صنف جديد للمنيو</h2>
     
     <div class="form-group">
       <label>اختر القسم</label>
@@ -224,16 +190,16 @@
     <div class="row">
       <div class="form-group">
         <label>وصف الصنف (بالعربي) - اختياري</label>
-        <textarea id="desc-ar" placeholder="مثال: يقدم مع أرز وخضار مشوي"></textarea>
+        <textarea id="desc-ar" placeholder="مثال: كباب ضاني مشوي على الفحم يقدم مع الخضار"></textarea>
       </div>
       <div class="form-group">
         <label>Description (English) - Optional</label>
-        <textarea id="desc-en" placeholder="e.g. Served with rice and grilled vegetables"></textarea>
+        <textarea id="desc-en" placeholder="e.g. Charcoal grilled lamb kebab served with vegetables"></textarea>
       </div>
     </div>
 
     <div class="form-group">
-      <label>رابط صورة الوجبة (اختياري)</label>
+      <label>رابط صورة الوجبة (اختياري - اتركه فارغاً إذا لم توجد صورة)</label>
       <input type="text" id="item-img" placeholder="https://example.com/photo.jpg">
     </div>
 
@@ -251,13 +217,14 @@
     <button class="btn" id="save-btn" onclick="addItem()"><i class="fa-solid fa-check"></i> حفظ الصنف في المنيو</button>
   </div>
 
-  <!-- عرض الأصناف مقسمة حسب الفئات -->
+  <!-- عرض الأصناف مقسمة حسب الفئات مع أزرار الترتيب -->
   <div class="panel">
-    <h2><i class="fa-solid fa-layer-group"></i> الأصناف الحالية (<span id="txt-current-section-list">صالة المطعم</span>)</h2>
+    <h2><i class="fa-solid fa-layer-group"></i> الأصناف الحالية مقسمة حسب الفئات</h2>
+    <p style="font-size: 12px; color: #888; margin-bottom: 12px;">استخدم الأسهم (⬆️ ⬇️) لترتيب ظهور الأقسام أو الأصناف في المنيو:</p>
     <div id="accordion-container">جاري تحميل البيانات...</div>
   </div>
 
-  <!-- نافذة تعديل الصنف ونقله -->
+  <!-- نافذة تعديل الصنف (بها خيار نقل القسم) -->
   <div id="edit-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -268,7 +235,7 @@
       <input type="hidden" id="edit-item-idx">
 
       <div class="form-group">
-        <label style="color:var(--gold); font-weight:bold;">القسم التابع له:</label>
+        <label style="color:var(--gold); font-weight:bold;">القسم التابع له (يمكنك تغيير القسم لنقل الصنف فوراً):</label>
         <select id="edit-item-cat"></select>
       </div>
 
@@ -317,6 +284,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
+ <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyALAk-3SXOw7kmrwKrGp5cp9o77Nxf9Ufo",
@@ -330,11 +300,8 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-
-    let currentMode = 'restaurant';
     let currentMenuData = [];
     let openedCategories = {};
-    let unsubscribeSnapshot = null;
 
     function formatIconDisplay(icon) {
       if (!icon) return '🍽️';
@@ -357,68 +324,90 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const bindTrans = (arId, enId, def) => {
-        const ar = document.getElementById(arId);
-        const en = document.getElementById(enId);
-        if (ar && en) {
-          ar.addEventListener('blur', async () => {
-            if (ar.value.trim() && !en.value.trim()) {
-              en.placeholder = "جاري الترجمة...";
-              const res = await autoTranslate(ar.value);
-              if (res) en.value = res;
-              en.placeholder = def;
-            }
-          });
-        }
-      };
+      const catAr = document.getElementById('cat-name-ar');
+      const catEn = document.getElementById('cat-name-en');
+      if (catAr && catEn) {
+        catAr.addEventListener('blur', async () => {
+          if (catAr.value.trim() && !catEn.value.trim()) {
+            catEn.placeholder = "جاري الترجمة...";
+            const trans = await autoTranslate(catAr.value);
+            if (trans) catEn.value = trans;
+            catEn.placeholder = "e.g. Grills";
+          }
+        });
+      }
 
-      bindTrans('cat-name-ar', 'cat-name-en', 'e.g. Grills');
-      bindTrans('name-ar', 'name-en', 'e.g. Grilled Kebab');
-      bindTrans('desc-ar', 'desc-en', 'e.g. Charcoal grilled...');
-      bindTrans('edit-name-ar', 'edit-name-en', '');
-      bindTrans('edit-desc-ar', 'edit-desc-en', '');
+      const nameAr = document.getElementById('name-ar');
+      const nameEn = document.getElementById('name-en');
+      if (nameAr && nameEn) {
+        nameAr.addEventListener('blur', async () => {
+          if (nameAr.value.trim() && !nameEn.value.trim()) {
+            nameEn.placeholder = "جاري الترجمة...";
+            const trans = await autoTranslate(nameAr.value);
+            if (trans) nameEn.value = trans;
+            nameEn.placeholder = "e.g. Grilled Kebab";
+          }
+        });
+      }
+
+      const descAr = document.getElementById('desc-ar');
+      const descEn = document.getElementById('desc-en');
+      if (descAr && descEn) {
+        descAr.addEventListener('blur', async () => {
+          if (descAr.value.trim() && !descEn.value.trim()) {
+            descEn.placeholder = "جاري الترجمة...";
+            const trans = await autoTranslate(descAr.value);
+            if (trans) descEn.value = trans;
+            descEn.placeholder = "e.g. Charcoal grilled lamb kebab...";
+          }
+        });
+      }
+
+      const editNameAr = document.getElementById('edit-name-ar');
+      const editNameEn = document.getElementById('edit-name-en');
+      if (editNameAr && editNameEn) {
+        editNameAr.addEventListener('blur', async () => {
+          if (editNameAr.value.trim() && !editNameEn.value.trim()) {
+            editNameEn.placeholder = "جاري الترجمة...";
+            const trans = await autoTranslate(editNameAr.value);
+            if (trans) editNameEn.value = trans;
+          }
+        });
+      }
+
+      const editDescAr = document.getElementById('edit-desc-ar');
+      const editDescEn = document.getElementById('edit-desc-en');
+      if (editDescAr && editDescEn) {
+        editDescAr.addEventListener('blur', async () => {
+          if (editDescAr.value.trim() && !editDescEn.value.trim()) {
+            editDescEn.placeholder = "جاري الترجمة...";
+            const trans = await autoTranslate(editDescAr.value);
+            if (trans) editDescEn.value = trans;
+          }
+        });
+      }
     });
 
-    function switchMenuMode(mode) {
-      currentMode = mode;
-      document.getElementById('tab-restaurant').classList.toggle('active', mode === 'restaurant');
-      document.getElementById('tab-takeaway').classList.toggle('active', mode === 'takeaway');
-      
-      const label = mode === 'restaurant' ? 'صالة المطعم' : 'منفذ التيك أواي';
-      document.getElementById('txt-current-section-cat').innerText = label;
-      document.getElementById('txt-current-section-item').innerText = label;
-      document.getElementById('txt-current-section-list').innerText = label;
+    // رسم الواجهة الأولية فوراً
+    renderMenuAccordion();
 
-      listenToMenuData();
-    }
-
-    function getDocName() {
-      return currentMode === 'takeaway' ? 'takeaway_categories' : 'categories';
-    }
-
-    // استماع آمن: لا يمسح ولا يعدل في السيرفر إلا لو ضغطت حفظ
-    function listenToMenuData() {
-      if (unsubscribeSnapshot) unsubscribeSnapshot();
-      
-      const docName = getDocName();
-      document.getElementById('accordion-container').innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">جاري تحميل البيانات...</p>';
-
-      unsubscribeSnapshot = db.collection("menu").doc(docName).onSnapshot((doc) => {
-        if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
-          currentMenuData = doc.data().list;
-        } else {
-          currentMenuData = [];
-        }
-        populateCategoriesDropdown();
-        renderMenuAccordion();
-      }, (error) => {
-        console.error("Firebase Error: ", error);
-        document.getElementById('accordion-container').innerHTML = 
-          '<p style="color:#E74C3C; font-size:13px; text-align:center;">تعذر جلب البيانات. تأكد من اتصال الإنترنت أو صلاحيات Firebase Rules.</p>';
-      });
-    }
-
-    listenToMenuData();
+    // الاستماع المباشر للتغييرات من السيرفر
+    db.collection("menu").doc("categories").onSnapshot((doc) => {
+      if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
+        currentMenuData = doc.data().list;
+      } else {
+        currentMenuData = [];
+        db.collection("menu").doc("categories").set({ list: [] }, { merge: true });
+      }
+      populateCategoriesDropdown();
+      renderMenuAccordion();
+    }, (error) => {
+      console.error("Firebase Snapshot Error: ", error);
+      const container = document.getElementById('accordion-container');
+      if (container) {
+        container.innerHTML = '<p style="color:#E74C3C; font-size:13px; text-align:center;">تعذر الاتصال بالسيرفر، تأكد من الإنترنت أو أعد تحميل الصفحة.</p>';
+      }
+    });
 
     function populateCategoriesDropdown() {
       const select = document.getElementById('item-cat');
@@ -434,7 +423,8 @@
       currentMenuData.forEach(cat => {
         const opt = document.createElement('option');
         opt.value = cat.id;
-        opt.innerHTML = `${formatIconDisplay(cat.icon)} ${cat.name_ar} (${cat.name_en || ''})`;
+        const iconDisplay = formatIconDisplay(cat.icon);
+        opt.innerHTML = `${iconDisplay} ${cat.name_ar} (${cat.name_en || ''})`;
         select.appendChild(opt);
       });
     }
@@ -445,7 +435,7 @@
       container.innerHTML = '';
 
       if (currentMenuData.length === 0) {
-        container.innerHTML = `<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام في (${currentMode === 'restaurant' ? 'صالة المطعم' : 'التيك أواي'}) حالياً. استخدم النموذج بالأعلى لإضافة أول قسم.</p>`;
+        container.innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام حالياً. استخدم النموذج بالأعلى لإضافة أول قسم.</p>';
         return;
       }
 
@@ -472,9 +462,9 @@
             <span class="cat-badge">${items.length} صنف</span>
           </div>
           <div class="cat-header-actions cat-btn-action">
-            <button class="order-btn" onclick="moveCategory(${catIdx}, -1)" title="تحريك لأعلى"><i class="fa-solid fa-arrow-up"></i></button>
-            <button class="order-btn" onclick="moveCategory(${catIdx}, 1)" title="تحريك لأسفل"><i class="fa-solid fa-arrow-down"></i></button>
-            <button class="del-btn" onclick="deleteCategory(${catIdx})" title="حذف هذا القسم"><i class="fa-solid fa-trash"></i> حذف</button>
+            <button class="order-btn" onclick="moveCategory(${catIdx}, -1)" title="تحريك القسم لأعلى"><i class="fa-solid fa-arrow-up"></i></button>
+            <button class="order-btn" onclick="moveCategory(${catIdx}, 1)" title="تحريك القسم لأسفل"><i class="fa-solid fa-arrow-down"></i></button>
+            <button class="del-btn" onclick="deleteCategory(${catIdx})" title="حذف هذا القسم بالكامل"><i class="fa-solid fa-trash"></i> حذف</button>
           </div>
         `;
 
@@ -519,6 +509,7 @@
       openedCategories[catId] = !openedCategories[catId];
       const body = document.getElementById(`cat-body-${catId}`);
       const titleInfo = document.getElementById(`title-info-${catId}`);
+      
       if (body) {
         const isOpen = openedCategories[catId];
         body.style.display = isOpen ? 'block' : 'none';
@@ -548,27 +539,29 @@
     function addCategory() {
       const nameAr = document.getElementById('cat-name-ar').value.trim();
       const nameEn = document.getElementById('cat-name-en').value.trim();
-      let icon = document.getElementById('cat-icon').value.trim() || '🍽️';
+      let icon = document.getElementById('cat-icon').value.trim();
+      if (!icon) icon = '🍽️';
 
       if (!nameAr) {
         alert("يرجى إدخال اسم القسم بالعربي");
         return;
       }
       const newCatId = "cat_" + Date.now();
-      currentMenuData.push({
+      const newCat = {
         id: newCatId,
         name_ar: nameAr,
         name_en: nameEn || nameAr,
         icon: icon,
         items: []
-      });
+      };
+      currentMenuData.push(newCat);
       openedCategories[newCatId] = true;
       
       saveToFirebase(() => {
         document.getElementById('cat-name-ar').value = '';
         document.getElementById('cat-name-en').value = '';
         document.getElementById('cat-icon').value = '🍽️';
-        alert("تمت إضافة القسم بنجاح!");
+        alert("تمت إضافة القسم الجديد بنجاح!");
       });
     }
 
@@ -639,7 +632,8 @@
       currentMenuData.forEach((cat, idx) => {
         const opt = document.createElement('option');
         opt.value = idx;
-        opt.innerHTML = `${formatIconDisplay(cat.icon)} ${cat.name_ar}`;
+        const iconDisplay = formatIconDisplay(cat.icon);
+        opt.innerHTML = `${iconDisplay} ${cat.name_ar}`;
         if (idx === catIdx) opt.selected = true;
         catSelect.appendChild(opt);
       });
@@ -709,13 +703,10 @@
     }
 
     function saveToFirebase(callback) {
-      const docName = getDocName();
-      db.collection("menu").doc(docName).set({ list: currentMenuData }).then(() => {
+      db.collection("menu").doc("categories").set({ list: currentMenuData }).then(() => {
         if (callback) callback();
       }).catch(err => {
         alert("خطأ أثناء الحفظ: " + err.message);
       });
     }
   </script>
-</body>
-</html>
