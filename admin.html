@@ -328,9 +328,7 @@
       measurementId: "G-BH18Y6JBGW"
     };
 
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     let currentMode = 'restaurant';
@@ -398,11 +396,12 @@
       return currentMode === 'takeaway' ? 'takeaway_categories' : 'categories';
     }
 
-    // استماع آمن تماماً (لا يعدل أو يمسح أي بيانات على الإطلاق)
+    // استماع آمن: لا يمسح ولا يعدل في السيرفر إلا لو ضغطت حفظ
     function listenToMenuData() {
       if (unsubscribeSnapshot) unsubscribeSnapshot();
       
       const docName = getDocName();
+      document.getElementById('accordion-container').innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">جاري تحميل البيانات...</p>';
 
       unsubscribeSnapshot = db.collection("menu").doc(docName).onSnapshot((doc) => {
         if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
@@ -415,7 +414,7 @@
       }, (error) => {
         console.error("Firebase Error: ", error);
         document.getElementById('accordion-container').innerHTML = 
-          '<p style="color:#E74C3C; font-size:13px; text-align:center;">تعذر جلب البيانات من السيرفر.</p>';
+          '<p style="color:#E74C3C; font-size:13px; text-align:center;">تعذر جلب البيانات. تأكد من اتصال الإنترنت أو صلاحيات Firebase Rules.</p>';
       });
     }
 
@@ -446,7 +445,7 @@
       container.innerHTML = '';
 
       if (currentMenuData.length === 0) {
-        container.innerHTML = `<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام في (${currentMode === 'restaurant' ? 'صالة المطعم' : 'التيك أواي'}) حالياً. استخدم النموذج بالأعلى لإضافة قسم جديد.</p>`;
+        container.innerHTML = `<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام في (${currentMode === 'restaurant' ? 'صالة المطعم' : 'التيك أواي'}) حالياً. استخدم النموذج بالأعلى لإضافة أول قسم.</p>`;
         return;
       }
 
@@ -666,8 +665,8 @@
 
       const nameAr = document.getElementById('edit-name-ar').value.trim();
       const nameEn = document.getElementById('edit-name-en').value.trim();
-      const descAr = document.getElementById('desc-ar').value.trim();
-      const descEn = document.getElementById('desc-en').value.trim();
+      const descAr = document.getElementById('edit-desc-ar').value.trim();
+      const descEn = document.getElementById('edit-desc-en').value.trim();
       const img = document.getElementById('edit-img').value.trim();
       const mPrice = parseFloat(document.getElementById('edit-member-price').value);
       const gPrice = parseFloat(document.getElementById('edit-guest-price').value);
