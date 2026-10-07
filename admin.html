@@ -23,6 +23,7 @@
       --card: #1B1B1F;
       --border: #2C2C32;
       --blue: #2980B9;
+      --green: #27ae60;
       --dark-btn: #33333d;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
@@ -33,7 +34,7 @@
     
     .menu-type-tabs {
       display: flex;
-      max-width: 680px;
+      max-width: 780px;
       margin: 0 auto 20px;
       background: var(--card);
       border: 1px solid var(--border);
@@ -47,7 +48,7 @@
       border: none;
       background: transparent;
       color: #A0A0A8;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       border-radius: 8px;
       cursor: pointer;
@@ -63,7 +64,7 @@
       box-shadow: 0 4px 12px rgba(163, 18, 25, 0.4);
     }
 
-    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; max-width: 680px; margin-inline: auto; }
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; max-width: 780px; margin-inline: auto; }
     .panel h2 { font-size: 16px; color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
     
     .form-group { margin-bottom: 12px; }
@@ -169,15 +170,29 @@
 
   <div class="header">
     <h1>لوحة إدارة منيو نادي الجلاء</h1>
-    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إدارة مستقلة لقائمة صالة المطعم ومنفذ التيك أواي</p>
+    <p style="font-size: 12px; color: #A0A0A8; margin-top: 4px;">إدارة قوائم صالة المطعم، منفذ التيك أواي، ومنفذ الحلواني</p>
   </div>
 
   <div class="menu-type-tabs">
     <button class="menu-tab-btn active" id="tab-restaurant" onclick="switchMenuMode('restaurant')">
-      <i class="fa-solid fa-utensils"></i> قائمة صالة المطعم
+      <i class="fa-solid fa-utensils"></i> صالة المطعم
     </button>
     <button class="menu-tab-btn" id="tab-takeaway" onclick="switchMenuMode('takeaway')">
-      <i class="fa-solid fa-bag-shopping"></i> قائمة منفذ التيك أواي
+      <i class="fa-solid fa-bag-shopping"></i> منفذ التيك أواي
+    </button>
+    <button class="menu-tab-btn" id="tab-pastry" onclick="switchMenuMode('pastry')">
+      <i class="fa-solid fa-cake-candles"></i> منفذ الحلواني
+    </button>
+  </div>
+
+  <!-- لوحة استعادة البيانات بضغطة زر -->
+  <div class="panel" style="border-color: rgba(39, 174, 96, 0.4); background: #152219;">
+    <h2><i class="fa-solid fa-cloud-arrow-up" style="color: var(--green);"></i> حقن واسترجاع القوائم الأصلية</h2>
+    <p style="font-size: 13px; color: #ccc; margin-bottom: 12px;">
+      زر استعادة وحقن الـ 95 صنفاً كاملة مع أسعار العضوية والزائر والترجمة والوصف لجميع المنافذ بضغطة واحدة، دون التأثير على إمكانية التعديل لاحقاً.
+    </p>
+    <button class="btn" id="btn-seed-all" style="background: var(--green);" onclick="seedAllDataToFirebase()">
+      <i class="fa-solid fa-bolt"></i> رفع وتحديث كامل أقسام وأصناف المنيو (95 صنف)
     </button>
   </div>
 
@@ -224,11 +239,11 @@
     <div class="row">
       <div class="form-group">
         <label>وصف الصنف (بالعربي) - اختياري</label>
-        <textarea id="desc-ar" placeholder="مثال: يقدم مع أرز وخضار مشوي"></textarea>
+        <textarea id="desc-ar" placeholder="مثال: تقدم مع أرز ابيض او بطاطس + خضار مشوي"></textarea>
       </div>
       <div class="form-group">
         <label>Description (English) - Optional</label>
-        <textarea id="desc-en" placeholder="e.g. Served with rice and grilled vegetables"></textarea>
+        <textarea id="desc-en" placeholder="e.g. Served with white rice or potatoes + grilled vegetables"></textarea>
       </div>
     </div>
 
@@ -376,7 +391,7 @@
 
       bindTrans('cat-name-ar', 'cat-name-en', 'e.g. Grills');
       bindTrans('name-ar', 'name-en', 'e.g. Grilled Kebab');
-      bindTrans('desc-ar', 'desc-en', 'e.g. Charcoal grilled...');
+      bindTrans('desc-ar', 'desc-en', 'e.g. Served with...');
       bindTrans('edit-name-ar', 'edit-name-en', '');
       bindTrans('edit-desc-ar', 'edit-desc-en', '');
     });
@@ -385,8 +400,12 @@
       currentMode = mode;
       document.getElementById('tab-restaurant').classList.toggle('active', mode === 'restaurant');
       document.getElementById('tab-takeaway').classList.toggle('active', mode === 'takeaway');
+      document.getElementById('tab-pastry').classList.toggle('active', mode === 'pastry');
       
-      const label = mode === 'restaurant' ? 'صالة المطعم' : 'منفذ التيك أواي';
+      let label = 'صالة المطعم';
+      if (mode === 'takeaway') label = 'منفذ التيك أواي';
+      if (mode === 'pastry') label = 'منفذ الحلواني';
+
       document.getElementById('txt-current-section-cat').innerText = label;
       document.getElementById('txt-current-section-item').innerText = label;
       document.getElementById('txt-current-section-list').innerText = label;
@@ -395,13 +414,13 @@
     }
 
     function getDocName() {
-      return currentMode === 'takeaway' ? 'takeaway_categories' : 'categories';
+      if (currentMode === 'takeaway') return 'takeaway_categories';
+      if (currentMode === 'pastry') return 'pastry_categories';
+      return 'categories';
     }
 
-    // استماع آمن تماماً (لا يعدل أو يمسح أي بيانات على الإطلاق)
     function listenToMenuData() {
       if (unsubscribeSnapshot) unsubscribeSnapshot();
-      
       const docName = getDocName();
 
       unsubscribeSnapshot = db.collection("menu").doc(docName).onSnapshot((doc) => {
@@ -446,7 +465,8 @@
       container.innerHTML = '';
 
       if (currentMenuData.length === 0) {
-        container.innerHTML = `<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام في (${currentMode === 'restaurant' ? 'صالة المطعم' : 'التيك أواي'}) حالياً. استخدم النموذج بالأعلى لإضافة قسم جديد.</p>`;
+        let label = currentMode === 'restaurant' ? 'صالة المطعم' : (currentMode === 'takeaway' ? 'التيك أواي' : 'الحلواني');
+        container.innerHTML = `<p style="color:#aaa; font-size:13px; text-align:center; padding: 15px;">لا توجد أقسام في (${label}) حالياً. يمكنك استخدام زر استرجاع القوائم بالأعلى أو إضافة قسم يدوياً.</p>`;
         return;
       }
 
@@ -716,6 +736,326 @@
       }).catch(err => {
         alert("خطأ أثناء الحفظ: " + err.message);
       });
+    }
+
+    // دالة استرجاع وحقن الـ 95 صنفاً كاملة بدون كلمة قسم
+    async function seedAllDataToFirebase() {
+      if (!confirm("هل تريد حقن المنيو الأصلي لجميع المنافذ (صالة المطعم، التيك أواي، الحلواني)؟")) return;
+      const btn = document.getElementById('btn-seed-all');
+      btn.disabled = true;
+      btn.innerText = "⏳ جاري كتابة البيانات في Firestore...";
+
+      // 1. صالة المطعم
+      const restaurantCategories = [
+        {
+          id: "res_soup", name_ar: "الشوربة", name_en: "Soups", icon: "🥣",
+          items: [
+            { name_ar: "شوربة كريمة فراخ", name_en: "Cream of Chicken Soup", desc_ar: "شوربة كريمية غنية وساخنة مع قطع صدور الدجاج المتبلة ومزينة بالبقدونس الطازج.", desc_en: "Rich and creamy hot soup with tender chicken pieces.", img: "", member_price: 55, guest_price: 60 },
+            { name_ar: "شوربة عدس", name_en: "Lentil Soup", desc_ar: "شوربة عدس أصفر غنية ومطبوخة على الطريقة الشرقية بالتوابل الخاصة وتقدم مع شرائح الليمون.", desc_en: "Traditional Oriental yellow lentil soup with special spices.", img: "", member_price: 35, guest_price: 40 },
+            { name_ar: "شوربة لسان العصفور", name_en: "Orzo Soup (Lesan Asfour)", desc_ar: "حبات لسان العصفور المحمرة والمطهية في مرقة لحم/دجاج غنية بالنكهة مع الليمون.", desc_en: "Golden toasted orzo pasta simmered in rich broth.", img: "", member_price: 18, guest_price: 20 },
+            { name_ar: "شوربة خضروات", name_en: "Fresh Vegetable Soup", desc_ar: "تشكيلة طازجة من خضروات الموسم في مرقة خفيفة وصحية.", desc_en: "A wholesome mix of fresh seasonal vegetables in light broth.", img: "", member_price: 23, guest_price: 25 }
+          ]
+        },
+        {
+          id: "res_appetizers", name_ar: "فواتح الشهية", name_en: "Hot Appetizers", icon: "🥟",
+          items: [
+            { name_ar: "طلب ورق عنب", name_en: "Stuffed Grape Leaves", desc_ar: "أصابع ورق عنب طازجة محشية بخلطة الأرز والأعشاب الشرقية مع دبس الرمان.", desc_en: "Tender grape leaves stuffed with spiced rice and herbs.", img: "", member_price: 60, guest_price: 65 },
+            { name_ar: "طلب دولمه مشكلة", name_en: "Mixed Dolma", desc_ar: "تشكيلة محاشي مشكلة محشية بالأرز والخلطة الشرقية الشهية.", desc_en: "Assorted stuffed vegetables with seasoned rice.", img: "", member_price: 60, guest_price: 65 },
+            { name_ar: "طلب جلاش باللحمة المفرومة", name_en: "Meat Goulash", desc_ar: "طبقات جلاش ذهبية مقرمشة محشوة باللحم المفروم المتبل ومخبوزة في الفرن.", desc_en: "Golden crispy filo pastry baked with spiced minced beef.", img: "", member_price: 55, guest_price: 60 },
+            { name_ar: "طلب سمبوسك لحم", name_en: "Meat Sambousak", desc_ar: "سمبوسك مقلية ومقرمشة محشوة باللحم المفروم والبصل والبهارات الشرقية.", desc_en: "Crispy fried pastry stuffed with savory minced meat.", img: "", member_price: 55, guest_price: 60 },
+            { name_ar: "طلب سمبوسك جبنة", name_en: "Cheese Sambousak", desc_ar: "سمبوسك مقرمشة محشوة بمزيج غني من الأجبان والنعناع وحبة البركة.", desc_en: "Crunchy fried pastry stuffed with melted cheese blend.", img: "", member_price: 45, guest_price: 50 },
+            { name_ar: "طلب كوبيبة", name_en: "Kobeba", desc_ar: "حبات كبيبة مقلية ومقرمشة محشوة باللحم المفروم والمكسرات.", desc_en: "Crispy bulgur and meat shells stuffed with minced beef.", img: "", member_price: 75, guest_price: 85 },
+            { name_ar: "طلب أورديفير", name_en: "Assorted Hors d'oeuvres Platter", desc_ar: "طبق مشكل فاخر يجمع تشكيلة مختارة من فواتح الشهية والمقبلات الساخنة المميزة.", desc_en: "A deluxe platter featuring an assortment of hot appetizers.", img: "", member_price: 115, guest_price: 130 }
+          ]
+        },
+        {
+          id: "res_carbs", name_ar: "النشويات", name_en: "Carbs & Pastas", icon: "🍚",
+          items: [
+            { name_ar: "أرز أبيض سادة", name_en: "Plain White Rice", desc_ar: "أرز مصري أبيض مفلفل ومطهو بالسمن البلدي الطبيعي.", desc_en: "Fluffy Egyptian white rice cooked with natural ghee.", img: "", member_price: 20, guest_price: 25 },
+            { name_ar: "أرز بالخلطة", name_en: "Spiced Rice with Nuts & Raisins", desc_ar: "أرز مكرمل بالتوابل الشرقية والمكسرات المحمصة والزبيب.", desc_en: "Caramelized spiced rice topped with roasted nuts.", img: "", member_price: 30, guest_price: 35 },
+            { name_ar: "أرز كارى", name_en: "Curry Rice", desc_ar: "أرز بنكهة ولون الكاري الذهبي الغني بالأعشاب والبهارات.", desc_en: "Fragrant yellow rice seasoned with aromatic curry spices.", img: "", member_price: 25, guest_price: 30 },
+            { name_ar: "أرز بالشعرية", name_en: "Rice with Vermicelli", desc_ar: "أرز مصري كلاسيكي محضر مع الشعرية المحمرة الذهبية.", desc_en: "Classic Egyptian white rice cooked with vermicelli.", img: "", member_price: 20, guest_price: 25 },
+            { name_ar: "كيلو أرز أبيض / شعرية", name_en: "1 Kg White Rice / Vermicelli", desc_ar: "سيرفيس عائلي (1 كيلو) أرز أبيض سادة أو بالشعرية حسب الرغبة.", desc_en: "Family-size platter (1 kg) of plain or vermicelli rice.", img: "", member_price: 160, guest_price: 200 },
+            { name_ar: "أرز بسمتى بالخلطة", name_en: "Basmati Rice with Spices & Nuts", desc_ar: "أرز بسمتي طويل الحبة متبل بخلطة البهارات الشرقية ومزين بالمكسرات.", desc_en: "Long-grain basmati rice with special blend and roasted nuts.", img: "", member_price: 40, guest_price: 45 },
+            { name_ar: "كيلو أرز بسمتى", name_en: "1 Kg Basmati Rice", desc_ar: "سيرفيس عائلي (1 كيلو) أرز بسمتي فاخر وطويل الحبة.", desc_en: "Large family platter (1 kg) of cooked basmati rice.", img: "", member_price: 280, guest_price: 320 },
+            { name_ar: "مكرونة فرن", name_en: "Baked Pasta Béchamel", desc_ar: "طاجن مكرونة بالبشاميل واللحم المفروم المتبل ومحمرة في الفرن.", desc_en: "Baked penne pasta layered with minced beef and béchamel.", img: "", member_price: 80, guest_price: 90 },
+            { name_ar: "مكرونة نجريسكو", name_en: "Chicken Negresco Pasta", desc_ar: "مكرونة فرن مع صوص البشاميل الكريمي وقطع الدجاج والمشروم والجبنة الذائبة.", desc_en: "Baked pasta casserole with chicken, mushrooms, and cheese.", img: "", member_price: 85, guest_price: 95 },
+            { name_ar: "مكرونة بالصلصة", name_en: "Pasta with Red Tomato Sauce", desc_ar: "مكرونة طازجة متبلة بصلصة الطماطم الغنية والأعشاب.", desc_en: "Fresh pasta tossed in rich savory red tomato sauce.", img: "", member_price: 40, guest_price: 45 },
+            { name_ar: "مكرونة وايت صوص بالمشروم والفراخ", name_en: "Alfredo Pasta with Chicken & Mushroom", desc_ar: "مكرونة بالصلصة البيضاء مع قطع صدور الدجاج والمشروم.", desc_en: "Creamy white sauce pasta with chicken and mushrooms.", img: "", member_price: 80, guest_price: 90 },
+            { name_ar: "مكرونة بالصلصة واللحمة المفرومة", name_en: "Pasta Bolognese", desc_ar: "مكرونة بصلصة الطماطم الغنية باللحم المفروم المعصج والبهارات الخاصة.", desc_en: "Pasta topped with savory minced beef bolognese.", img: "", member_price: 80, guest_price: 90 },
+            { name_ar: "بوم فريت", name_en: "French Fries", desc_ar: "أصابع بطاطس ذهبية ومقرمشة ومتبلة.", desc_en: "Crispy golden french fries seasoned with spices.", img: "", member_price: 30, guest_price: 35 }
+          ]
+        },
+        {
+          id: "res_sides", name_ar: "الأطباق الإضافية", name_en: "Side Dishes & Casseroles", icon: "🍲",
+          items: [
+            { name_ar: "طلب خضار سوتية", name_en: "Sautéed Vegetables", desc_ar: "تشكيلة خضار طازجة مشوحة بالزبدة الخفيفة والأعشاب.", desc_en: "Fresh seasonal vegetables lightly sautéed in butter.", img: "", member_price: 40, guest_price: 45 },
+            { name_ar: "طاجن خضار مسبك", name_en: "Mixed Vegetable Casserole (Torly)", desc_ar: "خضار مشكل مطهو في صلصة طماطم مسبكة بالفرن على الطريقة المصرية الأصيلة.", desc_en: "Traditional baked vegetable casserole in tomato sauce.", img: "", member_price: 40, guest_price: 45 },
+            { name_ar: "طاجن بامية سادة", name_en: "Plain Okra Casserole", desc_ar: "طاجن بامية طازجة بالصلصة المسبكة والثوم والكزبرة مطهو في الفرن.", desc_en: "Tender okra baked in savory garlic and tomato sauce.", img: "", member_price: 50, guest_price: 55 },
+            { name_ar: "طاجن بامية باللحمة", name_en: "Okra Casserole with Meat", desc_ar: "طاجن بامية فلاحي بقطع اللحم البلدي الطري مطهو في الفرن.", desc_en: "Baked okra casserole with tender cuts of beef.", img: "", member_price: 130, guest_price: 150 },
+            { name_ar: "طاجن خضار باللحمة", name_en: "Mixed Vegetable Casserole with Meat", desc_ar: "طاجن تورلي غني بالخضار المتنوع مع قطع اللحم البلدي في الفرن.", desc_en: "Baked mixed vegetables with succulent chunks of beef.", img: "", member_price: 120, guest_price: 135 },
+            { name_ar: "طاجن ملوخية", name_en: "Egyptian Molokhia Casserole", desc_ar: "ملوخية خضراء طازجة بطشة الثوم والكزبرة المميزة.", desc_en: "Traditional green molokhia soup with garlic and coriander tadka.", img: "", member_price: 50, guest_price: 55 },
+            { name_ar: "طاجن كوسة بالبشاميل", name_en: "Zucchini Béchamel Casserole", desc_ar: "طبقات كوسة متبلة ومحشوة باللحم المفروم ومغطاة بصوص البشاميل والجبن.", desc_en: "Baked sliced zucchini layered with minced beef and béchamel.", img: "", member_price: 85, guest_price: 90 }
+          ]
+        },
+        {
+          id: "res_poultry", name_ar: "أطباق الطيور", name_en: "Poultry Dishes", icon: "🍗",
+          items: [
+            { name_ar: "ربع فراخ مشوى", name_en: "Quarter Grilled Chicken", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 125, guest_price: 140 },
+            { name_ar: "نصف فراخ مشوى", name_en: "Half Grilled Chicken", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 230, guest_price: 260 },
+            { name_ar: "نصف فراخ روستو", name_en: "Half Roasted Chicken", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 230, guest_price: 260 },
+            { name_ar: "طلب صدور فراخ بانية", name_en: "Chicken Pane", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 145, guest_price: 160 },
+            { name_ar: "طلب شيش طاووق", name_en: "Shish Tawook", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 160, guest_price: 175 },
+            { name_ar: "طلب فاهيتا فراخ", name_en: "Chicken Fajitas", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 145, guest_price: 160 },
+            { name_ar: "قطعه فراخ كوردن بلو", name_en: "Chicken Cordon Bleu", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 200, guest_price: 220 },
+            { name_ar: "قطعه فراخ فارسيه", name_en: "Persian Stuffed Chicken Breast", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 160, guest_price: 175 },
+            { name_ar: "طلب فراخ برميچان", name_en: "Chicken Parmesan", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 200, guest_price: 220 },
+            { name_ar: "طلب فراخ كتشانورى", name_en: "Chicken Cacciatore", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 200, guest_price: 220 },
+            { name_ar: "حمام محشى أرز", name_en: "Stuffed Pigeon with Spiced Rice", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 200, guest_price: 220 }
+          ]
+        },
+        {
+          id: "res_meat", name_ar: "أطباق اللحوم", name_en: "Meat Dishes", icon: "🥩",
+          items: [
+            { name_ar: "إسكالوب بانية", name_en: "Veal Escalope Pane", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 230, guest_price: 250 },
+            { name_ar: "بيكاتا بتلو صوص مشروم", name_en: "Veal Piccata with Mushroom Sauce", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 265, guest_price: 290 },
+            { name_ar: "شرائح لحم وش فخده صوص مشروم", name_en: "Beef Round Steak with Mushroom Sauce", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 230, guest_price: 260 },
+            { name_ar: "طلب كفته داوود باشا", name_en: "Dawood Basha Meatballs", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 130, guest_price: 140 },
+            { name_ar: "طاجن كباب حلة بالخضراوات (كبير)", name_en: "Beef Kebab Hala with Vegetables (Large)", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 200, guest_price: 220 },
+            { name_ar: "طاجن كباب حلة بالخضراوات (صغير)", name_en: "Beef Kebab Hala with Vegetables (Small)", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 130, guest_price: 140 },
+            { name_ar: "مشويات مشكل", name_en: "Mixed Grill Platter", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 230, guest_price: 260 },
+            { name_ar: "مشويات مشكل مكس", name_en: "Mixed Grill Mix Platter", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 320, guest_price: 350 },
+            { name_ar: "مشويات مشكل إسبيشيال", name_en: "Special Mixed Grill Platter", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 450, guest_price: 520 },
+            { name_ar: "كيلو كفته", name_en: "1 Kg Kofta", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 650, guest_price: 700 },
+            { name_ar: "كيلو كباب بتلو", name_en: "1 Kg Veal Kebab", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 1000, guest_price: 1100 },
+            { name_ar: "كيلو مشكل كباب بتلو و كفته", name_en: "1 Kg Mixed Veal Kebab & Kofta", desc_ar: "تقدم مع أرز ابيض او بطاطس + خضار مشوي", desc_en: "Served with white rice or potatoes + grilled vegetables", img: "", member_price: 825, guest_price: 900 }
+          ]
+        },
+        {
+          id: "res_takeaway_meals", name_ar: "وجبات التيك أواى", name_en: "Takeaway Meals", icon: "📦",
+          items: [
+            { name_ar: "وجبة ربع فراخ مشوية", name_en: "Quarter Grilled Chicken Meal", desc_ar: "", desc_en: "", img: "", member_price: 125, guest_price: 140 },
+            { name_ar: "وجبة نصف فراخ مشوية", name_en: "Half Grilled Chicken Meal", desc_ar: "", desc_en: "", img: "", member_price: 225, guest_price: 250 },
+            { name_ar: "وجبة فرخه كامله مشوية", name_en: "Whole Grilled Chicken Meal", desc_ar: "", desc_en: "", img: "", member_price: 450, guest_price: 500 },
+            { name_ar: "كيلو كباب بتلو", name_en: "1 Kg Veal Kebab", desc_ar: "", desc_en: "", img: "", member_price: 1000, guest_price: 1100 },
+            { name_ar: "كيلو كفته", name_en: "1 Kg Kofta", desc_ar: "", desc_en: "", img: "", member_price: 675, guest_price: 750 }
+          ]
+        },
+        {
+          id: "res_services", name_ar: "تصنيع وتسويات", name_en: "Cooking & Grilling Services", icon: "🔥",
+          items: [
+            { name_ar: "تسوية ديك رومى بدون أرز للكيلو الواحد", name_en: "Turkey Cooking per Kg (Without Rice)", desc_ar: "", desc_en: "", img: "", member_price: 90, guest_price: 100 },
+            { name_ar: "تسوية ديك رومى بالأرز للكيلو الواحد", name_en: "Turkey Cooking per Kg (With Rice)", desc_ar: "", desc_en: "", img: "", member_price: 110, guest_price: 125 },
+            { name_ar: "تسويه اوزى بالأرز", name_en: "Ouzi Cooking (With Rice)", desc_ar: "", desc_en: "", img: "", member_price: 120, guest_price: 135 },
+            { name_ar: "تسويه اوزى بدون أرز", name_en: "Ouzi Cooking (Without Rice)", desc_ar: "", desc_en: "", img: "", member_price: 100, guest_price: 110 },
+            { name_ar: "تسوية / شوى لحم للكيلو الواحد", name_en: "Meat Grilling / Cooking per Kg", desc_ar: "", desc_en: "", img: "", member_price: 100, guest_price: 110 },
+            { name_ar: "تسوية / شوى فرخة للكيلو الواحد", name_en: "Chicken Grilling / Cooking per Kg", desc_ar: "", desc_en: "", img: "", member_price: 50, guest_price: 55 },
+            { name_ar: "شوى سمك للكيلو الواحد", name_en: "Fish Grilling per Kg", desc_ar: "", desc_en: "", img: "", member_price: 50, guest_price: 55 },
+            { name_ar: "تسوية 1 كيلو أرز بسمتى / بلدى", name_en: "1 Kg Basmati / Baladi Rice Cooking", desc_ar: "", desc_en: "", img: "", member_price: 20, guest_price: 25 }
+          ]
+        },
+        {
+          id: "res_hot_drinks", name_ar: "المشروبات الساخنة", name_en: "Hot Drinks", icon: "☕",
+          items: [
+            { name_ar: "شاى", name_en: "Black Tea", desc_ar: "شاي أحمر كلاسيكي فاخر يقدم ساخناً.", desc_en: "Classic premium hot black tea.", img: "", member_price: 10, guest_price: 15 },
+            { name_ar: "شاى بحليب", name_en: "Tea with Milk", desc_ar: "مزيج الشاي الإنجليزي الغني بالحليب الطبيعي الساخن.", desc_en: "Rich brewed black tea combined with steamed fresh milk.", img: "", member_price: 15, guest_price: 20 },
+            { name_ar: "شاى أخضر", name_en: "Green Tea", desc_ar: "شاي أخضر طبيعي غني بمضادات الأكسدة بنكهة نقية ومنعشة.", desc_en: "Pure antioxidant-rich green tea with a light flavor.", img: "", member_price: 15, guest_price: 20 },
+            { name_ar: "أعشاب (ينسون -...)", name_en: "Herbal Infusion", desc_ar: "مشروب أعشاب طبيعية دافئة ومهدئة.", desc_en: "Soothing hot natural herbal infusion.", img: "", member_price: 15, guest_price: 20 },
+            { name_ar: "قهوة تركى", name_en: "Turkish Coffee", desc_ar: "قهوة تركي أصيلة ومضبوطة بوش كريمي غني.", desc_en: "Traditional rich Turkish coffee brewed with cardamom.", img: "", member_price: 25, guest_price: 35 },
+            { name_ar: "قهوة فرنساوى", name_en: "French Coffee", desc_ar: "قهوة ناعمة ممزوجة بالحليب المبخر والرغوة الغنية.", desc_en: "Smooth brewed coffee blended with steamed creamy milk.", img: "", member_price: 35, guest_price: 45 },
+            { name_ar: "قهوة تركى دبل", name_en: "Double Turkish Coffee", desc_ar: "فنجان مزدوج من القهوة التركية المركزة.", desc_en: "Double shot of rich and strong Turkish coffee.", img: "", member_price: 35, guest_price: 45 },
+            { name_ar: "قهوة إسبريسو", name_en: "Espresso", desc_ar: "شوت إسبريسو إيطالي مركز وغني بالكريمة.", desc_en: "Concentrated rich Italian espresso shot with dense crema.", img: "", member_price: 45, guest_price: 60 },
+            { name_ar: "كاكاو باللبن", name_en: "Hot Cocoa with Milk", desc_ar: "بودرة كاكاو فاخرة مذابة في الحليب الساخن كامل الدسم.", desc_en: "Rich cocoa powder whisked into steaming whole milk.", img: "", member_price: 35, guest_price: 45 },
+            { name_ar: "قرفة سادة", name_en: "Pure Hot Cinnamon", desc_ar: "مشروب القرفة الطبيعية الساخنة والمحلاة.", desc_en: "Fragrant and warming pure hot brewed cinnamon tea.", img: "", member_price: 15, guest_price: 20 },
+            { name_ar: "قرفة باللبن", name_en: "Cinnamon with Milk", desc_ar: "قرفة دافئة مغلية مع الحليب الطبيعي الساخن.", desc_en: "Steamed hot milk infused with sweet aromatic cinnamon spice.", img: "", member_price: 20, guest_price: 25 },
+            { name_ar: "نسكافية باللبن", name_en: "Nescafé with Milk", desc_ar: "قهوة نسكافيه سريعة التحضير ممزوجة بالحليب المغلي.", desc_en: "Classic instant coffee blended with creamy steamed milk.", img: "", member_price: 25, guest_price: 35 },
+            { name_ar: "نسكافية سادة", name_en: "Black Nescafé", desc_ar: "كوب نسكافيه كلاسيكي سادة ساخن ومميز.", desc_en: "Simple and energizing hot black instant coffee.", img: "", member_price: 15, guest_price: 20 },
+            { name_ar: "كوفى مكس", name_en: "Coffee Mix (3 in 1)", desc_ar: "مشروب قهوة سريع التحضير مضاف إليه مبيض القهوة الكريمة.", desc_en: "Sweet and creamy 3-in-1 coffee blend with milk creamer.", img: "", member_price: 20, guest_price: 25 },
+            { name_ar: "كابتشينو", name_en: "Cappuccino", desc_ar: "إسبريسو غني بالحليب المبخر ومغطى برغوة كثيفة.", desc_en: "Rich espresso topped with steamed milk and velvety milk foam.", img: "", member_price: 45, guest_price: 60 }
+          ]
+        },
+        {
+          id: "res_cold_drinks", name_ar: "المشروبات المثلجة", name_en: "Cold Drinks", icon: "🥤",
+          items: [
+            { name_ar: "كانز (بيبسى – كولا ... إلخ ) كبير", name_en: "Large Soft Drink Can", desc_ar: "مشروب غازي منعش مثلج بحجم كبير.", desc_en: "Refreshing chilled large soft drink can.", img: "", member_price: 22, guest_price: 27 },
+            { name_ar: "كانز (بيبسى – كولا... إلخ) صغير", name_en: "Small Soft Drink Can", desc_ar: "عبوة كانز مشروب غازي مثلجة بحجم عادي/صغير.", desc_en: "Standard chilled canned carbonated soft drink.", img: "", member_price: 20, guest_price: 25 },
+            { name_ar: "كانز فيروز", name_en: "Fayrouz Malt Can", desc_ar: "مشروب شعير فوار منعش وخال من الكحول بنكهات الفواكه الطبيعية.", desc_en: "Refreshing non-alcoholic sparkling flavored malt drink.", img: "", member_price: 25, guest_price: 30 },
+            { name_ar: "كانز بريل", name_en: "Birell Malt Drink Can", desc_ar: "مشروب شعير نقي مثلج وخال من الكحول ذو طعم غني ومنعش.", desc_en: "Chilled non-alcoholic classic malt beverage with crisp taste.", img: "", member_price: 25, guest_price: 30 },
+            { name_ar: "مياة معدنية صغيرة", name_en: "Small Mineral Water", desc_ar: "زجاجة مياه معدنية طبيعية نقية مثلجة (600 مل).", desc_en: "Pure chilled natural mineral water bottle (600ml).", img: "", member_price: 8, guest_price: 10 },
+            { name_ar: "مياة معدنية كبيرة", name_en: "Large Mineral Water", desc_ar: "زجاجة مياه معدنية طبيعية نقية عائلية (1.5 لتر).", desc_en: "Pure chilled natural mineral water bottle (1.5L).", img: "", member_price: 15, guest_price: 18 }
+          ]
+        },
+        {
+          id: "res_juices", name_ar: "العصائر", name_en: "Fresh Juices", icon: "🍹",
+          items: [
+            { name_ar: "عصير كيوى", name_en: "Fresh Kiwi Juice", desc_ar: "عصير كيوي طبيعي طازج غني بفيتامين C ومنعش.", desc_en: "Freshly squeezed natural kiwi juice packed with vitamin C.", img: "", member_price: 60, guest_price: 70 },
+            { name_ar: "عصير كوكتيل", name_en: "Mixed Fruit Cocktail", desc_ar: "مزيج منعش من طبقات الفواكه الموسمية الطبيعية الطازجة.", desc_en: "Layered mixed fresh seasonal fruit cocktail.", img: "", member_price: 40, guest_price: 50 },
+            { name_ar: "عصير رمان", name_en: "Fresh Pomegranate Juice", desc_ar: "عصير حبوب الرمان الطبيعي الطازج ومثلج.", desc_en: "Pure freshly extracted ruby pomegranate juice served chilled.", img: "", member_price: 40, guest_price: 50 },
+            { name_ar: "عصير كنتالوب", name_en: "Fresh Cantaloupe Juice", desc_ar: "عصير كنتالوب طازج وبارد ذو مذاق حلو ومنعش وخفيف.", desc_en: "Sweet and refreshing freshly blended cantaloupe melon juice.", img: "", member_price: 40, guest_price: 50 },
+            { name_ar: "عصير مانجو", name_en: "Fresh Mango Juice", desc_ar: "عصير مانجو طبيعي ثقيل وغني بالنكهة الاستوائية.", desc_en: "Thick and luscious natural pure mango juice served chilled.", img: "", member_price: 40, guest_price: 50 },
+            { name_ar: "عصير برتقال", name_en: "Fresh Orange Juice", desc_ar: "برتقال بلدي طازج معصور على البارد، طبيعي 100%.", desc_en: "100% pure freshly squeezed cold orange juice.", img: "", member_price: 35, guest_price: 45 },
+            { name_ar: "عصير فراولة", name_en: "Fresh Strawberry Juice", desc_ar: "عصير فراولة بلدي طازجة ومثلجة ذات قوام غني.", desc_en: "Freshly blended ripe strawberry juice served chilled.", img: "", member_price: 35, guest_price: 45 },
+            { name_ar: "عصير جوافة", name_en: "Fresh Guava Juice", desc_ar: "عصير جوافة طبيعي ناعم الملمس متوفر باللبن أو بدونه.", desc_en: "Smooth and aromatic natural guava juice.", img: "", member_price: 35, guest_price: 45 },
+            { name_ar: "زبادى خلاط", name_en: "Whipped Yogurt Smoothie", desc_ar: "زبادي طازج مخفوق في الخلاط مع الحليب والعسل الأبيض.", desc_en: "Blended fresh creamy yogurt drink with milk and honey.", img: "", member_price: 40, guest_price: 50 },
+            { name_ar: "عصير موز باللبن", name_en: "Banana with Milk Smoothie", desc_ar: "قطع موز طازجة مخفوقة بالحليب الطبيعي البارد.", desc_en: "Fresh bananas blended with chilled whole milk.", img: "", member_price: 30, guest_price: 40 },
+            { name_ar: "ليمون نعناع فيتراك", name_en: "Lemon Mint with Vitrac Syrup", desc_ar: "عصير ليمون طازج منعش ممزوج مع شربات نعناع فيتراك.", desc_en: "Zesty fresh lemonade infused with sweet Vitrac mint syrup.", img: "", member_price: 25, guest_price: 30 },
+            { name_ar: "ليمون", name_en: "Fresh Lemonade", desc_ar: "عصير ليمون طبيعي مثلج ومنعش ومحضر في الحال.", desc_en: "Freshly squeezed chilled natural lemonade.", img: "", member_price: 20, guest_price: 25 }
+          ]
+        }
+      ];
+
+      // 2. منفذ التيك أواي
+      const takeawayCategories = [
+        {
+          id: "takeaway_sandwiches", name_ar: "الساندوتشات", name_en: "Sandwiches", icon: "🥪",
+          items: [
+            { name_ar: "ساندوتش فراخ بانية", name_en: "Chicken Pane Sandwich", desc_ar: "صدور دجاج بانيه مقرمشة مع الخس والمايونيز في خبز طازج.", desc_en: "Crispy breaded chicken breast with lettuce and mayonnaise.", img: "", member_price: 80, guest_price: 90 },
+            { name_ar: "ساندوتش شيش طاووق", name_en: "Shish Tawook Sandwich", desc_ar: "قطع دجاج شيش طاووق متبلة ومشوية مع التومية والمخلل.", desc_en: "Charcoal-grilled marinated chicken skewers with garlic dip.", img: "", member_price: 90, guest_price: 100 },
+            { name_ar: "ساندوتش كفته", name_en: "Kofta Sandwich", desc_ar: "أصابع كفتة لحم بلدي مشوية على الفحم مع سلطة الطحينة.", desc_en: "Charcoal-grilled minced beef kofta with tahini sauce.", img: "", member_price: 90, guest_price: 100 },
+            { name_ar: "ساندوتش جبنة رومى", name_en: "Roumy Cheese Sandwich", desc_ar: "شرائح جبنة رومي مصرية فاخرة في خبز طازج.", desc_en: "Premium Egyptian aged Roumy cheese slices in fresh bread.", img: "", member_price: 35, guest_price: 40 },
+            { name_ar: "ساندوتش هوت دوج", name_en: "Hot Dog Sandwich", desc_ar: "هوت دوج مشوي مع الكاتشب والماسترد والمخلل وصوص المايونيز.", desc_en: "Grilled hot dog with ketchup, mustard, pickles, and mayo.", img: "", member_price: 70, guest_price: 75 },
+            { name_ar: "ساندوتش شاورما لحم", name_en: "Beef Shawarma Sandwich", desc_ar: "شرائح لحم بقري متبلة بتوابل الشاورما مع البقدونس والطحينة.", desc_en: "Sliced marinated beef shawarma tossed with parsley and tahini.", img: "", member_price: 110, guest_price: 120 },
+            { name_ar: "ساندوتش شاورما فراخ", name_en: "Chicken Shawarma Sandwich", desc_ar: "شرائح شاورما دجاج متبلة ومحمرة مع الثومية والخيار المخلل.", desc_en: "Marinated shredded chicken shawarma with garlic dip and pickles.", img: "", member_price: 90, guest_price: 100 },
+            { name_ar: "ساندوتش حواوشى", name_en: "Hawawshi", desc_ar: "رغيف بلدي محشو باللحم المفروم المتبل ومخبوز مقرمش.", desc_en: "Spiced minced beef stuffed in traditional baladi bread.", img: "", member_price: 70, guest_price: 75 },
+            { name_ar: "ساندوتش برجر", name_en: "Beef Burger", desc_ar: "قطعة برجر لحم مشوية مع الخس وشرائح الطماطم وصوص البرجر.", desc_en: "Grilled beef burger patty with lettuce and tomatoes.", img: "", member_price: 60, guest_price: 70 },
+            { name_ar: "ساندوتش برجر بيض", name_en: "Beef Burger with Egg", desc_ar: "قطعة برجر مشوية مغطاة ببيضة مقلية مع الخضار الطازج.", desc_en: "Grilled beef patty topped with a fried egg and fresh veggies.", img: "", member_price: 70, guest_price: 80 },
+            { name_ar: "ساندوتش برجر جبنة شيدر", name_en: "Cheeseburger (Cheddar)", desc_ar: "برجر لحم مشوي مغطى بشريحة جبنة شيدر ذائبة مع الخس وصوص الشيدر.", desc_en: "Juicy beef burger topped with melted cheddar cheese slice.", img: "", member_price: 80, guest_price: 90 }
+          ]
+        },
+        {
+          id: "takeaway_pizza", name_ar: "البيتزا", name_en: "Pizza", icon: "🍕",
+          items: [
+            { name_ar: "بيتزا مارجريتا", name_en: "Margherita Pizza", desc_ar: "صلصة طماطم إيطالية غنية، جبنة موزاريلا ذائبة، ريحان وزعتر.", desc_en: "Classic Italian tomato sauce, melted mozzarella cheese, and herbs.", img: "", member_price: 95, guest_price: 110 },
+            { name_ar: "بيتزا خضروات", name_en: "Vegetable Pizza", desc_ar: "صلصة طماطم وموزاريلا مع فلفل رومي ملون، طماطم، زيتون، بصل ومشروم.", desc_en: "Tomato sauce and mozzarella with bell peppers, olives, and mushrooms.", img: "", member_price: 120, guest_price: 135 },
+            { name_ar: "بيتزا مشروم", name_en: "Mushroom Pizza", desc_ar: "شرائح مشروم طازجة وفيرة مع صلصة الطماطم وجبنة الموزاريلا.", desc_en: "Fresh mushroom slices with tomato sauce and melted mozzarella.", img: "", member_price: 120, guest_price: 135 },
+            { name_ar: "بيتزا سجق", name_en: "Oriental Sausage Pizza", desc_ar: "سجق بلدي متبل مع صلصة الطماطم، جبنة موزاريلا، فلفل وزيتون.", desc_en: "Spiced Egyptian oriental sausage with mozzarella and peppers.", img: "", member_price: 135, guest_price: 150 },
+            { name_ar: "بيتزا شاورما فراخ", name_en: "Chicken Shawarma Pizza", desc_ar: "شرائح شاورما دجاج متبلة مع جبنة موزاريلا وفلفل ألوان وزيتون.", desc_en: "Seasoned chicken shawarma slices with mozzarella and peppers.", img: "", member_price: 160, guest_price: 175 },
+            { name_ar: "بيتزا شاورما لحمة", name_en: "Beef Shawarma Pizza", desc_ar: "شرائح شاورما لحم بقري بتتبيلة شرقية مع الموزاريلا والبصل والطماطم.", desc_en: "Marinated beef shawarma strips with mozzarella, onions, and tomatoes.", img: "", member_price: 210, guest_price: 220 },
+            { name_ar: "بيتزا هوت دوج / سوسيس", name_en: "Hot Dog / Sausage Pizza", desc_ar: "شرائح هوت دوج مدخن مع صلصة البيتزا والموزاريلا والفلفل.", desc_en: "Sliced hot dogs with pizza sauce, mozzarella cheese, and peppers.", img: "", member_price: 135, guest_price: 150 },
+            { name_ar: "بيتزا تونة", name_en: "Tuna Pizza", desc_ar: "قطع تونة لحم فاخرة مع الموزاريلا والبصل والفلفل الأخضر والزيتون.", desc_en: "Premium tuna chunks with mozzarella, onions, and olives.", img: "", member_price: 185, guest_price: 200 },
+            { name_ar: "بيتزا مشكل لحوم", name_en: "Meat Lovers Pizza", desc_ar: "مزيج شهي من اللحم المفروم، السجق، السوسيس، والبسطرمة مع الموزاريلا.", desc_en: "Savory combo of minced meat, sausage, hot dog, and pastrami.", img: "", member_price: 170, guest_price: 180 },
+            { name_ar: "بيتزا مشكل جبن", name_en: "Four Cheese Pizza", desc_ar: "توليفة غنية من جبنة موزاريلا، شيدر، رومي، وكيري مع الزعتر.", desc_en: "Rich blend of mozzarella, cheddar, roumy, and cream cheeses.", img: "", member_price: 135, guest_price: 150 },
+            { name_ar: "بيتزا بسطرمة", name_en: "Pastrami Pizza", desc_ar: "شرائح بسطرمة بلدي مع صلصة الطماطم، الموزاريلا والفلفل الرومي.", desc_en: "Authentic Egyptian pastrami slices with tomato sauce and mozzarella.", img: "", member_price: 180, guest_price: 190 },
+            { name_ar: "بيتزا سلامى", name_en: "Beef Salami Pizza", desc_ar: "شرائح سلامي بقري مدخن ومقرمش مع جبنة الموزاريلا والزيتون الأسود.", desc_en: "Sliced beef salami with melted mozzarella cheese and black olives.", img: "", member_price: 170, guest_price: 180 }
+          ]
+        }
+      ];
+
+      // 3. منفذ الحلواني
+      const pastryCategories = [
+        {
+          id: "pastry_bakery", name_ar: "المعجنات", name_en: "Pastries & Bakery", icon: "🥐",
+          items: [
+            { name_ar: "باتية بالجبنة (كبير)", name_en: "Large Cheese Pâté", desc_ar: "باتيه مورق وهش محشو بالجبنة البيضاء الفاخرة (كبير).", desc_en: "Flaky puff pastry stuffed with white cheese (Large).", img: "", member_price: 15, guest_price: 17 },
+            { name_ar: "باتية بالجبنة (وسط)", name_en: "Medium Cheese Pâté", desc_ar: "باتيه مورق وهش محشو بالجبنة البيضاء اللذيذة (وسط).", desc_en: "Flaky puff pastry filled with white cheese (Medium).", img: "", member_price: 10, guest_price: 12 },
+            { name_ar: "كرواسون بالجبنة الرومى (كبير)", name_en: "Large Roumy Cheese Croissant", desc_ar: "كرواسون فرنسي مورق بالزبدة ومحشو بالجبنة الرومي (كبير).", desc_en: "Flaky butter croissant filled with savory Roumy cheese (Large).", img: "", member_price: 15, guest_price: 17 },
+            { name_ar: "كرواسون بالجبنة الرومى (وسط)", name_en: "Medium Roumy Cheese Croissant", desc_ar: "كرواسون فرنسي مورق ومحشو بالجبنة الرومي (وسط).", desc_en: "Flaky butter croissant stuffed with Roumy cheese (Medium).", img: "", member_price: 10, guest_price: 12 },
+            { name_ar: "دانش (كبير)", name_en: "Large Danish Pastry", desc_ar: "معجنات دانش خفيفة ومورقة بحشوة الكاسترد والفواكه (كبير).", desc_en: "Sweet flaky Danish pastry filled with custard and fruit (Large).", img: "", member_price: 15, guest_price: 17 },
+            { name_ar: "دانش (وسط)", name_en: "Medium Danish Pastry", desc_ar: "معجنات دانش مورقة محلاة بحشوة الكاسترد (وسط).", desc_en: "Flaky sweet Danish pastry topped with custard (Medium).", img: "", member_price: 10, guest_price: 12 },
+            { name_ar: "مينى باتية بالجبنة (الكيلو)", name_en: "Mini Cheese Pâté (1 Kg)", desc_ar: "كيلو ميني باتيه هش ومورق بحشوة الجبنة البيضاء اللذيذة.", desc_en: "1 kg of bite-sized flaky mini pâtés filled with cheese.", img: "", member_price: 165, guest_price: 185 },
+            { name_ar: "مينى كرواسون بالجبنة (الكيلو)", name_en: "Mini Cheese Croissant (1 Kg)", desc_ar: "كيلو ميني كرواسون زبدة مورق محشو بالأجبان المشكلة.", desc_en: "1 kg of mini flaky butter croissants stuffed with cheese.", img: "", member_price: 165, guest_price: 185 },
+            { name_ar: "مينى دانش (الكيلو)", name_en: "Mini Danish Assortment (1 Kg)", desc_ar: "تشكيلة ميني دانش محلى بالكاسترد ومربيات الفواكه (1 كيلو).", desc_en: "1 kg of assorted mini sweet Danish pastries.", img: "", member_price: 165, guest_price: 185 },
+            { name_ar: "مينى بيتزا (الكيلو)", name_en: "Mini Pizza Bites (1 Kg)", desc_ar: "كيلو قطع ميني بيتزا خفيفة مغطاة بالصلصة والجبن والزيتون.", desc_en: "1 kg of mini bite-sized pizzas topped with sauce and cheese.", img: "", member_price: 140, guest_price: 155 },
+            { name_ar: "فطير مشلتت (الواحدة)", name_en: "Feteer Meshaltet", desc_ar: "فطيرة فلاحي مورقة ومخبوزة بالسمن البلدي الطبيعي المقرمش.", desc_en: "Authentic Egyptian layered feteer baked with natural ghee.", img: "", member_price: 90, guest_price: 100 },
+            { name_ar: "إنجلش كيك (القالب 20 سم)", name_en: "English Cake (20 cm)", desc_ar: "كيك إنجليزي غني وهش بالفواكه المجففة والزبيب (20 سم).", desc_en: "Traditional rich English loaf cake with candied fruits (20 cm).", img: "", member_price: 80, guest_price: 90 },
+            { name_ar: "إنجلش كيك (القالب 40 سم)", name_en: "English Cake (40 cm)", desc_ar: "قالب عائلي كبير (40 سم) من الإنجلش كيك الفاخر المحضر بالزبدة.", desc_en: "Large family loaf (40 cm) of rich English fruit cake.", img: "", member_price: 165, guest_price: 185 },
+            { name_ar: "منين سادة (الكيلو)", name_en: "Plain Menein (1 Kg)", desc_ar: "أصابع منين مقرمش سادة برائحة اليانسون والشمر والسمن البلدي.", desc_en: "1 kg of traditional crunchy plain Egyptian anise biscotti.", img: "", member_price: 100, guest_price: 115 },
+            { name_ar: "منين بالعجوة (الكيلو)", name_en: "Date-filled Menein (1 Kg)", desc_ar: "منين مخبوز بالسمن ومحشو بمعجون التمر الطبيعي الفاخر والسمسم.", desc_en: "1 kg of baked pastry filled with date paste and sesame.", img: "", member_price: 115, guest_price: 125 },
+            { name_ar: "باتون سالية (الكيلو)", name_en: "Bâton Salé (1 Kg)", desc_ar: "أصابع مقرمشة ومملحة بنكهة الكمون وحبة البركة.", desc_en: "1 kg of crispy salted pastry sticks spiced with cumin.", img: "", member_price: 100, guest_price: 115 },
+            { name_ar: "بقسماط سادة (الكيلو)", name_en: "Plain Rusk (1 Kg)", desc_ar: "أصابع بقسماط ذهبية مقرمشة وخفيفة سادة للشاي.", desc_en: "1 kg of classic crunchy golden plain tea rusks.", img: "", member_price: 100, guest_price: 115 },
+            { name_ar: "بقسماط بالسمسم (الكيلو)", name_en: "Sesame Breadsticks (1 Kg)", desc_ar: "أصابع بقسماط مقرمشة مغطاة بالسمسم المحمص الفاخر.", desc_en: "1 kg of crunchy golden breadsticks coated with sesame.", img: "", member_price: 125, guest_price: 135 },
+            { name_ar: "ساليزون عادى (الكيلو)", name_en: "Assorted Salés (1 Kg)", desc_ar: "تشكيلة ساليزون مالح ومقرمش بحشوات متنوعة للمناسبات.", desc_en: "1 kg platter of assorted mini savory cocktail bites.", img: "", member_price: 180, guest_price: 200 }
+          ]
+        },
+        {
+          id: "pastry_desserts", name_ar: "أطباق الحلويات", name_en: "Desserts & Sweets", icon: "🍮",
+          items: [
+            { name_ar: "أم على", name_en: "Om Ali", desc_ar: "طاجن أم علي الكلاسيكي بعجينة الميلفوي والحليب والقشطة.", desc_en: "Classic baked puff pastry dessert with sweetened milk and cream.", img: "", member_price: 45, guest_price: 50 },
+            { name_ar: "أم على بالمكسرات", name_en: "Om Ali with Nuts", desc_ar: "طاجن أم علي الفاخر مع مزيج غني من المكسرات المحمصة والقشطة.", desc_en: "Deluxe baked Om Ali topped with roasted nuts and cream.", img: "", member_price: 70, guest_price: 75 },
+            { name_ar: "كريم كراميل", name_en: "Crème Caramel", desc_ar: "كاسترد ناعم الملمس مغطى بصوص السكر المكرمل الذهبي.", desc_en: "Silky chilled custard dessert glazed with caramel sauce.", img: "", member_price: 30, guest_price: 35 },
+            { name_ar: "أرز باللبن", name_en: "Egyptian Rice Pudding", desc_ar: "أرز بالحليب الطبيعي بنكهة الفانيليا وقوام كريمي ناعم.", desc_en: "Traditional creamy Egyptian rice pudding with milk.", img: "", member_price: 25, guest_price: 30 },
+            { name_ar: "جيلي فروت", name_en: "Fruit Jelly", desc_ar: "كاس جيلي الفراولة المنعش مع قطع الفواكه الموسمية.", desc_en: "Refreshing chilled strawberry gelatin layered with fresh fruits.", img: "", member_price: 20, guest_price: 25 },
+            { name_ar: "كاستر", name_en: "Vanilla Custard", desc_ar: "كاسترد فانيليا ناعم وغني بالحليب والقشطة.", desc_en: "Smooth chilled vanilla custard pudding topped with nuts.", img: "", member_price: 30, guest_price: 35 }
+          ]
+        },
+        {
+          id: "pastry_oriental", name_ar: "الحلويات الشرقية", name_en: "Oriental Sweets", icon: "🍯",
+          items: [
+            { name_ar: "لقمة القاضى (الكيلو)", name_en: "Zalabia / Lokma (1 Kg)", desc_ar: "كرات لقمة القاضي الذهبية المقرمشة والمغمسة في الشربات (1 كيلو).", desc_en: "1 kg of crispy golden fried dough balls soaked in syrup.", img: "", member_price: 110, guest_price: 120 },
+            { name_ar: "بلح الشام (الكيلو)", name_en: "Balah El Sham (1 Kg)", desc_ar: "أصابع بلح الشام المقرمشة من الخارج والطرية من الداخل (1 كيلو).", desc_en: "1 kg of classic Middle Eastern choux fritters in syrup.", img: "", member_price: 150, guest_price: 165 },
+            { name_ar: "بلح الشام بالكريمة والمكسرات (الكيلو)", name_en: "Balah El Sham with Cream & Nuts", desc_ar: "بلح الشام محشو بالقشطة الفاخرة ومزين بالمكسرات المحمصة.", desc_en: "1 kg of golden Balah El Sham filled with pastry cream and nuts.", img: "", member_price: 190, guest_price: 210 },
+            { name_ar: "بقلاوة مميزة (الكيلو)", name_en: "Special Baklava Assortment", desc_ar: "رقائق بقلاوة مورقة بالسمن البلدي ومحشوة بأجود أنواع الفستق.", desc_en: "1 kg of premium layered filo baklava with nuts.", img: "", member_price: 800, guest_price: 900 },
+            { name_ar: "بسبوسة سادة (الكيلو)", name_en: "Plain Basbousa (1 Kg)", desc_ar: "بسبوسة سميد ذهبية ومرملة بالسمن البلدي الفاخر.", desc_en: "1 kg of traditional moist semolina cake baked with ghee.", img: "", member_price: 230, guest_price: 240 },
+            { name_ar: "بسبوسة بالمكسرات (الكيلو)", name_en: "Basbousa with Nuts (1 Kg)", desc_ar: "بسبوسة مرملة بالسمن البلدي مغطاة بالبندق واللوز المحمص.", desc_en: "1 kg of golden semolina basbousa loaded with roasted nuts.", img: "", member_price: 280, guest_price: 300 },
+            { name_ar: "كنافة سادة (الكيلو)", name_en: "Plain Kunafa (1 Kg)", desc_ar: "كنافة شعر مقرمشة ومحمرة بالسمن البلدي الطبيعي.", desc_en: "1 kg of golden shredded pastry baked with clarified butter.", img: "", member_price: 180, guest_price: 190 },
+            { name_ar: "كنافة كريمة (الكيلو)", name_en: "Kunafa with Cream (1 Kg)", desc_ar: "كنافة ذهبية مقرمشة محشوة بطبقة غنية من القشطة والكريمة.", desc_en: "1 kg of crispy shredded pastry filled with clotted cream.", img: "", member_price: 210, guest_price: 220 },
+            { name_ar: "كنافة كريمة بالمكسرات (الكيلو)", name_en: "Kunafa with Cream & Nuts", desc_ar: "كنافة فاخرة محشوة بالكريمة ومغطاة بالمكسرات المحمصة.", desc_en: "1 kg of golden kunafa filled with smooth cream and nuts.", img: "", member_price: 340, guest_price: 330 },
+            { name_ar: "كنافة بورمة (الكيلو)", name_en: "Rolled Kunafa Borma with Nuts", desc_ar: "رول كنافة بورمة محشوة بالفستق والبندق ومحمصة بالسمن البلدي.", desc_en: "1 kg of rolled crispy kunafa packed with whole nuts.", img: "", member_price: 550, guest_price: 600 }
+          ]
+        },
+        {
+          id: "pastry_western", name_ar: "الحلويات الغربية", name_en: "Western Pastries & Desserts", icon: "🍰",
+          items: [
+            { name_ar: "بيتى فور مميز (الكيلو)", name_en: "Special Petit Four (1 Kg)", desc_ar: "تشكيلة بيتي فور ناعم وفاخر بالزبدة الطبيعية والمكسرات.", desc_en: "1 kg of delicate butter petit four dipped in chocolate.", img: "", member_price: 260, guest_price: 290 },
+            { name_ar: "بيتى فور عادى (الكيلو)", name_en: "Regular Petit Four (1 Kg)", desc_ar: "بيتي فور كلاسيكي هش وخفيف بنكهتي الفانيليا والكاكاو.", desc_en: "1 kg of classic delicate tea petit four biscuits.", img: "", member_price: 185, guest_price: 200 },
+            { name_ar: "قطعه إكلير", name_en: "Éclair", desc_ar: "عجينة شو فرنسية خفيفة محشوة بالباتيسيير وجناش الشوكولاتة.", desc_en: "Classic French choux pastry filled with pastry cream.", img: "", member_price: 30, guest_price: 35 },
+            { name_ar: "ريد فيلفت", name_en: "Red Velvet Cake Slice", desc_ar: "شريحة كيك ريد فيلفت هشة مع كريمة الجبن الناعمة.", desc_en: "Moist red velvet sponge layered with cream cheese frosting.", img: "", member_price: 25, guest_price: 30 },
+            { name_ar: "موس", name_en: "Mousse Cake Slice", desc_ar: "قطعة موس ناعمة وغنية بنكهة الشوكولاتة وقوام كريمي خفيف.", desc_en: "Velvety light and airy chocolate mousse dessert.", img: "", member_price: 30, guest_price: 35 },
+            { name_ar: "فادج", name_en: "Chocolate Fudge Cake Slice", desc_ar: "كيك فادج شوكولاتة كثيف وداكن وغني بصوص الشوكولاتة.", desc_en: "Decadent dark chocolate fudge cake slice with ganache.", img: "", member_price: 25, guest_price: 30 },
+            { name_ar: "تشيز كيك", name_en: "Cheesecake Slice", desc_ar: "قاعدة بسكويت مقرمشة تعلوها طبقة كريمة الجبن وصوص التوت.", desc_en: "Creamy cheesecake on a buttery biscuit base.", img: "", member_price: 45, guest_price: 50 },
+            { name_ar: "سويسرول أبيض", name_en: "Vanilla Swiss Roll Slice", desc_ar: "كيك إسفنجي فانيليا ملفوف محشو بالكريمة المخفوقة.", desc_en: "Soft vanilla sponge rolled with light whipped cream.", img: "", member_price: 30, guest_price: 35 },
+            { name_ar: "سويسرول شيكولاته", name_en: "Chocolate Swiss Roll Slice", desc_ar: "رول كيك إسفنجي بالشوكولاتة محشو بكريمة الكاكاو وجناش.", desc_en: "Tender chocolate sponge rolled with chocolate filling.", img: "", member_price: 35, guest_price: 40 },
+            { name_ar: "أرجنتال", name_en: "Argentale Cake Slice", desc_ar: "قطعة جاتوه أرجنتال بطبقات المكسرات المقرمشة والكريمة.", desc_en: "Signature crispy nutty Argentale pastry layered with cream.", img: "", member_price: 45, guest_price: 50 },
+            { name_ar: "ميلفيه", name_en: "Mille-feuille", desc_ar: "رقائق عجينة البف باستري بحشوة كريمة الباتيسيير الغنية.", desc_en: "Crisp flaky puff pastry layers filled with pastry cream.", img: "", member_price: 40, guest_price: 45 },
+            { name_ar: "جاتوة سوارية 2 كوش (الكيلو)", name_en: "Mini Soirée Gateaux (1 Kg)", desc_ar: "كيلو ميني جاتوه سواريه منوع طبقتين للمناسبات.", desc_en: "1 kg of elegant bite-sized mini soirée gateaux.", img: "", member_price: 230, guest_price: 255 },
+            { name_ar: "جاتوة أفراح 2 كوش", name_en: "Wedding Gateau (2 Layers)", desc_ar: "قطعة جاتوه مخصصة للأفراح والمناسبات بطبقتين.", desc_en: "Event & wedding gateau slice with two sponge layers.", img: "", member_price: 10, guest_price: 12 },
+            { name_ar: "جاتوة مميز 3 كوش", name_en: "Special Gateau (3 Layers)", desc_ar: "قطعة جاتوه فاخرة مكونة من 3 طبقات غنية بالكريمات.", desc_en: "Deluxe gateau made with three layers of sponge.", img: "", member_price: 15, guest_price: 18 }
+          ]
+        },
+        {
+          id: "pastry_cakes", name_ar: "التورت", name_en: "Cakes & Tarts", icon: "🎂",
+          items: [
+            { name_ar: "تورته مقاس 26 سم فواكه", name_en: "Round Fruit Cake (26 cm)", desc_ar: "كيك إسفنجي فانيليا محشو بالكريمة ومغطى بالفواكه (26 سم).", desc_en: "Light vanilla sponge cake topped with fresh fruits (26 cm).", img: "", member_price: 380, guest_price: 400 },
+            { name_ar: "تورته مقاس 26 سم شوكلاته مدوره", name_en: "Round Chocolate Cake (26 cm)", desc_ar: "كيك شوكولاتة إسفنجي غني بجناش الشوكولاتة الداكنة (26 سم).", desc_en: "Rich chocolate sponge cake glazed with ganache (26 cm).", img: "", member_price: 380, guest_price: 400 },
+            { name_ar: "تورته مقاس 26 سم شوكلاته & فواكه", name_en: "Round Half Choco & Half Fruit (26 cm)", desc_ar: "تورتة مقسمة نصف شوكولاتة ونصف فواكه (مقاس 26 سم).", desc_en: "Dual flavor cake half chocolate and half fruit (26 cm).", img: "", member_price: 380, guest_price: 400 },
+            { name_ar: "تورته مقاس 28 سم فواكه مدوره", name_en: "Round Fruit Cake (28 cm)", desc_ar: "كيك إسفنجي كبير مغطى بشرائح الفواكه الطازجة (28 سم).", desc_en: "Large fruit cake loaded with fresh sliced fruits (28 cm).", img: "", member_price: 480, guest_price: 500 },
+            { name_ar: "تورته مقاس 28 سم شوكلاته مدوره", name_en: "Round Chocolate Cake (28 cm)", desc_ar: "كيك شوكولاتة مدور بحجم كبير غني بطبقات الموس (28 سم).", desc_en: "Round chocolate cake layered with cocoa mousse (28 cm).", img: "", member_price: 480, guest_price: 500 },
+            { name_ar: "تورته مقاس 28 سم شوكلاته & فواكه", name_en: "Round Half Choco & Half Fruit (28 cm)", desc_ar: "تورتة حجم كبير مقسمة نصف شوكولاتة ونصف فواكه (28 سم).", desc_en: "Large half chocolate and half fruit combination cake (28 cm).", img: "", member_price: 480, guest_price: 500 },
+            { name_ar: "تورته 30 * 30 فواكه", name_en: "Square Fruit Cake (30x30 cm)", desc_ar: "تورتة مربعة للمناسبات مغطاة بقطع الفواكه الطازجة (30*30 سم).", desc_en: "Square celebration cake decorated with fresh fruits (30x30 cm).", img: "", member_price: 680, guest_price: 700 },
+            { name_ar: "تورته 30 * 30 شوكلاته", name_en: "Square Chocolate Cake (30x30 cm)", desc_ar: "تورتة شوكولاتة مربعة فاخرة للأعياد والمناسبات (30*30 سم).", desc_en: "Square rich chocolate celebration cake (30x30 cm).", img: "", member_price: 680, guest_price: 700 },
+            { name_ar: "تورته 30 * 30 شوكلاته & فواكه", name_en: "Square Half Choco & Half Fruit (30x30 cm)", desc_ar: "تورتة مربعة مقسمة نصف شوكولاتة ونصف فواكه (30*30 سم).", desc_en: "Square cake combining chocolate and fresh fruits (30x30 cm).", img: "", member_price: 680, guest_price: 700 },
+            { name_ar: "تورته 40 * 40 فواكه", name_en: "Square Fruit Cake (40x40 cm)", desc_ar: "تورتة عائلية كبيرة الحجم مربعة ومزينة بالفواكه (40*40 سم).", desc_en: "Large square party cake topped with fresh sliced fruits (40x40 cm).", img: "", member_price: 880, guest_price: 900 },
+            { name_ar: "تورته 40 * 40 شوكلاته", name_en: "Square Chocolate Cake (40x40 cm)", desc_ar: "تورتة شوكولاتة حجم كبير مربعة بطبقات غنية (40*40 سم).", desc_en: "Large square chocolate fudge cake for gatherings (40x40 cm).", img: "", member_price: 880, guest_price: 900 },
+            { name_ar: "تورته 40 * 40 شوكلاته & فواكه", name_en: "Square Half Choco & Half Fruit (40x40 cm)", desc_ar: "تورتة كبيرة مربعة تجمع بين الشوكولاتة والفواكه (40*40 سم).", desc_en: "Large square cake half covered with chocolate and fruit (40x40 cm).", img: "", member_price: 880, guest_price: 900 },
+            { name_ar: "تورته 50 * 50 فواكه", name_en: "Giant Square Fruit Cake (50x50 cm)", desc_ar: "تورتة ضخمة للمناسبات الكبرى بالفواكه الموسمية (50*50 سم).", desc_en: "Extra-large event cake with assorted fresh fruits (50x50 cm).", img: "", member_price: 1350, guest_price: 1400 },
+            { name_ar: "تورته 50 * 50 شوكلاته", name_en: "Giant Square Choco Cake (50x50 cm)", desc_ar: "تورتة احتفالات ضخمة مربعة مغطاة بجناش الشوكولاتة (50*50 سم).", desc_en: "Giant square chocolate celebration cake (50x50 cm).", img: "", member_price: 1350, guest_price: 1400 },
+            { name_ar: "تورته 50 * 50 شوكلاته & فواكه", name_en: "Giant Half Choco & Fruit (50x50 cm)", desc_ar: "تورتة حفلات ضخمة نصف شوكولاتة ونصف فواكه (50*50 سم).", desc_en: "Giant dual-flavor event cake combining chocolate and fruits (50x50 cm).", img: "", member_price: 1350, guest_price: 1400 },
+            { name_ar: "تورته 40 * 60 فواكه", name_en: "Rectangular Fruit Cake (40x60 cm)", desc_ar: "تورتة مستطيلة عملاقة مزينة بتشكيلة فواكه راقية (40*60 سم).", desc_en: "Mega rectangular banquet cake topped with fresh fruits (40x60 cm).", img: "", member_price: 1450, guest_price: 1500 },
+            { name_ar: "تورته 40 * 60 شوكلاته", name_en: "Rectangular Choco Cake (40x60 cm)", desc_ar: "تورتة مستطيلة ضخمة من الشوكولاتة الفاخرة (40*60 سم).", desc_en: "Mega rectangular chocolate banquet cake (40x60 cm).", img: "", member_price: 1450, guest_price: 1500 },
+            { name_ar: "تورته 40 * 60 شوكلاته & فواكه", name_en: "Rectangular Half Choco & Fruit (40x60 cm)", desc_ar: "تورتة مستطيلة عملاقة نصف شوكولاتة ونصف فواكه (40*60 سم).", desc_en: "Mega rectangular banquet cake with chocolate and fruits (40x60 cm).", img: "", member_price: 1450, guest_price: 1500 },
+            { name_ar: "تورته 60 * 60 فواكه", name_en: "Jumbo Square Fruit Cake (60x60 cm)", desc_ar: "أكبر مقاس تورتة مناسبات مربعة بالفواكه الطبيعية (60*60 سم).", desc_en: "Jumbo square celebration cake with fresh fruit toppings (60x60 cm).", img: "", member_price: 2000, guest_price: 2200 },
+            { name_ar: "تورته 60 * 60 شوكلاته", name_en: "Jumbo Square Choco Cake (60x60 cm)", desc_ar: "تورتة جامبو مربعة عملاقة من الشوكولاتة الفاخرة (60*60 سم).", desc_en: "Jumbo square celebration cake in rich chocolate ganache (60x60 cm).", img: "", member_price: 2000, guest_price: 2200 },
+            { name_ar: "تورته 60 * 60 شوكلاته & فواكه", name_en: "Jumbo Half Choco & Fruit (60x60 cm)", desc_ar: "تورتة جامبو عملاقة بنصفين شوكولاتة وفواكه (60*60 سم).", desc_en: "Jumbo dual-style grand party cake (60x60 cm).", img: "", member_price: 2000, guest_price: 2200 }
+          ]
+        }
+      ];
+
+      try {
+        const batch = db.batch();
+        batch.set(db.collection("menu").doc("categories"), { list: restaurantCategories });
+        batch.set(db.collection("menu").doc("takeaway_categories"), { list: takeawayCategories });
+        batch.set(db.collection("menu").doc("pastry_categories"), { list: pastryCategories });
+        await batch.commit();
+
+        btn.disabled = false;
+        btn.innerText = "✅ تم استرجاع وتحديث كافة القوائم بنجاح!";
+        alert("تم بنجاح حفظ كامل المنيو (95 صنفاً) لجميع المنافذ في قاعدة البيانات!");
+      } catch (err) {
+        console.error("Batch seed error:", err);
+        btn.disabled = false;
+        btn.innerText = "❌ حدث خطأ، أعد المحاولة";
+        alert("حدث خطأ أثناء الرفع: " + err.message);
+      }
     }
   </script>
 </body>
