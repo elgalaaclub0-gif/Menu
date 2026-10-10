@@ -712,38 +712,21 @@
     }
 
     function listenToMenuData() {
-      // كائن لحفظ البيانات محلياً لمنع تكرار طلبها من السيرفر
-const menuCache = {};
+      if (unsubscribeFirestore) unsubscribeFirestore();
+      
+      let docName = 'categories';
+      if (serviceType === 'takeaway') docName = 'takeaway_categories';
+      if (serviceType === 'pastry') docName = 'pastry_categories';
 
-function listenToMenuData() {
-  let docName = 'categories';
-  if (serviceType === 'takeaway') docName = 'takeaway_categories';
-  if (serviceType === 'pastry') docName = 'pastry_categories';
-
-  // 1. لو البيانات متحملة قبل كده، اعرضها فوراً في أقل من جزء من الثانية
-  if (menuCache[docName]) {
-    menuData = menuCache[docName];
-    renderCategories();
-    renderMenu();
-  }
-
-  // 2. إيقاف الاستماع السابق لتفادي بطء الذاكرة
-  if (unsubscribeFirestore) {
-    unsubscribeFirestore();
-    unsubscribeFirestore = null;
-  }
-
-  // 3. جلب أو تحديث البيانات في الخلفية بدون تعطيل المستخدم
-  unsubscribeFirestore = db.collection("menu").doc(docName).onSnapshot((doc) => {
-    if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
-      menuCache[docName] = doc.data().list;
-      menuData = doc.data().list;
-      renderCategories();
-      renderMenu();
-    }
-  }, (error) => {
-    console.error("Firestore Error:", error);
-  });
+      unsubscribeFirestore = db.collection("menu").doc(docName).onSnapshot((doc) => {
+        if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
+          menuData = doc.data().list;
+        } else {
+          menuData = [];
+        }
+        renderCategories();
+        renderMenu();
+      });
     }
 
     updateServiceUI();
