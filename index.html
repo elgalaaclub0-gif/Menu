@@ -55,32 +55,95 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
+      position: relative;
     }
 
-    .service-badge {
+    /* القائمة المنسدلة لاختيار المنفذ */
+    .dropdown-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .service-dropdown-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(0, 0, 0, 0.5);
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.65);
       border: 1px solid var(--accent-gold);
       color: var(--gold-light);
-      padding: 5px 12px;
+      padding: 7px 14px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
-      transition: 0.2s;
+      transition: all 0.25s ease;
     }
-    .service-badge:hover {
+    .service-dropdown-btn:hover {
       background: var(--accent-gold);
       color: #121214;
+    }
+    .service-dropdown-btn i.fa-chevron-down {
+      font-size: 11px;
+      transition: transform 0.25s;
+    }
+    .service-dropdown-btn.open i.fa-chevron-down {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      background: #1e1e24;
+      border: 1px solid var(--accent-gold);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+      min-width: 190px;
+      z-index: 1000;
+      overflow: hidden;
+    }
+    body:not(.en) .dropdown-menu { right: 0; }
+    body.en .dropdown-menu { left: 0; }
+
+    .dropdown-menu.show {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      background: transparent;
+      border: none;
+      width: 100%;
+      text-align: inherit;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .dropdown-item:hover {
+      background: rgba(221, 170, 56, 0.15);
+      color: var(--gold-light);
+    }
+    .dropdown-item.active {
+      background: var(--primary-red);
+      color: #fff;
     }
 
     .lang-btn {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid var(--accent-gold);
       color: var(--accent-gold);
-      padding: 5px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: 700;
@@ -334,11 +397,29 @@
 
   <header>
     <div class="top-controls">
-      <!-- زر يبين نوع المنيو الحالي ويسمح بالتبديل لو حب الزبون -->
-      <button class="service-badge" id="service-badge-btn" onclick="toggleServiceMode()">
-        <i class="fa-solid fa-utensils" id="service-icon"></i>
-        <span id="service-text">صالة المطعم</span>
-      </button>
+      <!-- القائمة المنسدلة لاختيار المنفذ -->
+      <div class="dropdown-container">
+        <button class="service-dropdown-btn" id="service-dropdown-btn" onclick="toggleDropdown(event)">
+          <i class="fa-solid fa-utensils" id="service-icon"></i>
+          <span id="service-text">صالة المطعم</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+
+        <div class="dropdown-menu" id="service-dropdown-menu">
+          <button class="dropdown-item" id="opt-restaurant" onclick="selectServiceMode('restaurant')">
+            <i class="fa-solid fa-utensils"></i>
+            <span id="txt-opt-restaurant">صالة المطعم</span>
+          </button>
+          <button class="dropdown-item" id="opt-takeaway" onclick="selectServiceMode('takeaway')">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span id="txt-opt-takeaway">منفذ التيك أواي</span>
+          </button>
+          <button class="dropdown-item" id="opt-pastry" onclick="selectServiceMode('pastry')">
+            <i class="fa-solid fa-cake-candles"></i>
+            <span id="txt-opt-pastry">منفذ الحلواني</span>
+          </button>
+        </div>
+      </div>
 
       <button class="lang-btn" onclick="toggleLanguage()">
         <i class="fa-solid fa-globe"></i>
@@ -396,9 +477,10 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // فحص الرابط: هل هو تيك أواي أم صالة؟
+    // فحص الرابط: restaurant, takeaway, أو pastry
     const urlParams = new URLSearchParams(window.location.search);
-    let serviceType = urlParams.get('type') === 'takeaway' ? 'takeaway' : 'restaurant';
+    let rawType = urlParams.get('type');
+    let serviceType = (rawType === 'takeaway' || rawType === 'pastry') ? rawType : 'restaurant';
 
     let menuData = [];
     let currentLang = 'ar';
@@ -412,30 +494,36 @@
         title: "نادي وفنادق القوات المسلحة",
         subRestaurant: "قائمة الأطعمة والمشروبات | صالة المطعم",
         subTakeaway: "قائمة الوجبات السريعة | منفذ التيك أواي",
-        badgeRestaurant: "صالة المطعم 🍽️",
-        badgeTakeaway: "منفذ التيك أواي 🛍️",
+        subPastry: "قائمة الحلويات والمخبوزات | منفذ الحلواني",
+        optRestaurant: "صالة المطعم",
+        optTakeaway: "منفذ التيك أواي",
+        optPastry: "منفذ الحلواني",
         memberBtn: "حاملي العضوية",
         guestBtn: "الزائرين",
         searchPlaceholder: "ابحث عن صنف أو طبق...",
         currency: "ج.م",
         memberPriceLabel: "سعر العضوية",
         guestPriceLabel: "سعر الزائر",
-        footer: "نادي الجلاء للقوات المسلحة © 2026"
+        footer: "نادي الجلاء للقوات المسلحة © 2026",
+        emptyMsg: "لا توجد أصناف معروضة في هذا المنفذ حالياً."
       },
       en: {
         langBtn: "العربية",
         title: "Armed Forces Clubs & Hotels",
         subRestaurant: "Food & Beverage Menu | Dine-in Restaurant",
         subTakeaway: "Fast Food Menu | Takeaway Outlet",
-        badgeRestaurant: "Dine-in 🍽️",
-        badgeTakeaway: "Takeaway 🛍️",
+        subPastry: "Pastries & Sweets Menu | Pastry Outlet",
+        optRestaurant: "Dine-in Restaurant",
+        optTakeaway: "Takeaway Outlet",
+        optPastry: "Pastry & Bakery",
         memberBtn: "Club Members",
         guestBtn: "Visitors / Guests",
         searchPlaceholder: "Search for dishes...",
         currency: "EGP",
         memberPriceLabel: "Member Price",
         guestPriceLabel: "Visitor Price",
-        footer: "Al-Galaa Armed Forces Club © 2026"
+        footer: "Al-Galaa Armed Forces Club © 2026",
+        emptyMsg: "No items available in this outlet currently."
       }
     };
 
@@ -447,24 +535,67 @@
       return icon;
     }
 
-    function updateServiceUI() {
-      const t = translations[currentLang];
-      if (serviceType === 'takeaway') {
-        document.getElementById('service-text').innerText = t.badgeTakeaway;
-        document.getElementById('txt-sub').innerText = t.subTakeaway;
+    function toggleDropdown(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('service-dropdown-menu');
+      const btn = document.getElementById('service-dropdown-btn');
+      const isOpen = menu.classList.contains('show');
+      if (isOpen) {
+        menu.classList.remove('show');
+        btn.classList.remove('open');
       } else {
-        document.getElementById('service-text').innerText = t.badgeRestaurant;
-        document.getElementById('txt-sub').innerText = t.subRestaurant;
+        menu.classList.add('show');
+        btn.classList.add('open');
       }
     }
 
-    function toggleServiceMode() {
-      serviceType = serviceType === 'restaurant' ? 'takeaway' : 'restaurant';
-      // تحديث الرابط دون إعادة تحميل الصفحة
+    document.addEventListener('click', (e) => {
+      const dropdown = document.querySelector('.dropdown-container');
+      if (dropdown && !dropdown.contains(e.target)) {
+        document.getElementById('service-dropdown-menu').classList.remove('show');
+        document.getElementById('service-dropdown-btn').classList.remove('open');
+      }
+    });
+
+    function selectServiceMode(mode) {
+      serviceType = mode;
+      document.getElementById('service-dropdown-menu').classList.remove('show');
+      document.getElementById('service-dropdown-btn').classList.remove('open');
+
       const newUrl = window.location.pathname + '?type=' + serviceType;
       window.history.replaceState(null, '', newUrl);
+
       updateServiceUI();
       listenToMenuData();
+    }
+
+    function updateServiceUI() {
+      const t = translations[currentLang];
+      const iconElem = document.getElementById('service-icon');
+      const textElem = document.getElementById('service-text');
+      const subElem = document.getElementById('txt-sub');
+
+      document.getElementById('opt-restaurant').classList.toggle('active', serviceType === 'restaurant');
+      document.getElementById('opt-takeaway').classList.toggle('active', serviceType === 'takeaway');
+      document.getElementById('opt-pastry').classList.toggle('active', serviceType === 'pastry');
+
+      document.getElementById('txt-opt-restaurant').innerText = t.optRestaurant;
+      document.getElementById('txt-opt-takeaway').innerText = t.optTakeaway;
+      document.getElementById('txt-opt-pastry').innerText = t.optPastry;
+
+      if (serviceType === 'takeaway') {
+        iconElem.className = 'fa-solid fa-bag-shopping';
+        textElem.innerText = t.optTakeaway;
+        subElem.innerText = t.subTakeaway;
+      } else if (serviceType === 'pastry') {
+        iconElem.className = 'fa-solid fa-cake-candles';
+        textElem.innerText = t.optPastry;
+        subElem.innerText = t.subPastry;
+      } else {
+        iconElem.className = 'fa-solid fa-utensils';
+        textElem.innerText = t.optRestaurant;
+        subElem.innerText = t.subRestaurant;
+      }
     }
 
     function toggleLanguage() {
@@ -517,7 +648,7 @@
       container.innerHTML = '';
 
       if (menuData.length === 0) {
-        container.innerHTML = `<p style="text-align:center; color:#aaa; margin-top:30px;">لا توجد وجبات معروضة في هذا القسم حالياً.</p>`;
+        container.innerHTML = `<p style="text-align:center; color:#aaa; margin-top:30px;">${t.emptyMsg}</p>`;
         return;
       }
 
@@ -560,7 +691,7 @@
             <div class="item-details">
               <div class="item-name">${currentLang === 'ar' ? item.name_ar : (item.name_en || item.name_ar)}</div>
               ${(item.desc_ar || item.desc_en) ? `<div class="item-desc">${currentLang === 'ar' ? (item.desc_ar || '') : (item.desc_en || '')}</div>` : ''}
-              ${currentPricingMode === 'member' ? `<span class="member-badge"><i class="fa-solid fa-id-badge"></i> عضوية</span>` : ''}
+              ${currentPricingMode === 'member' ? `<span class="member-badge"><i class="fa-solid fa-id-badge"></i> ${currentLang === 'ar' ? 'عضوية' : 'Member'}</span>` : ''}
             </div>
             <div class="price-container">
               <div class="price-value">${price} <span class="currency">${t.currency}</span></div>
@@ -583,7 +714,10 @@
     function listenToMenuData() {
       if (unsubscribeFirestore) unsubscribeFirestore();
       
-      const docName = serviceType === 'takeaway' ? 'takeaway_categories' : 'categories';
+      let docName = 'categories';
+      if (serviceType === 'takeaway') docName = 'takeaway_categories';
+      if (serviceType === 'pastry') docName = 'pastry_categories';
+
       unsubscribeFirestore = db.collection("menu").doc(docName).onSnapshot((doc) => {
         if (doc.exists && doc.data() && Array.isArray(doc.data().list)) {
           menuData = doc.data().list;
