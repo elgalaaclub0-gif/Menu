@@ -185,6 +185,17 @@
     </button>
   </div>
 
+  <!-- لوحة استعادة البيانات بضغطة زر -->
+  <div class="panel" style="border-color: rgba(39, 174, 96, 0.4); background: #152219;">
+    <h2><i class="fa-solid fa-cloud-arrow-up" style="color: var(--green);"></i> حقن واسترجاع القوائم الأصلية</h2>
+    <p style="font-size: 13px; color: #ccc; margin-bottom: 12px;">
+      زر استعادة وحقن الـ 95 صنفاً كاملة مع أسعار العضوية والزائر والترجمة والوصف لجميع المنافذ بضغطة واحدة، دون التأثير على إمكانية التعديل لاحقاً.
+    </p>
+    <button class="btn" id="btn-seed-all" style="background: var(--green);" onclick="seedAllDataToFirebase()">
+      <i class="fa-solid fa-bolt"></i> رفع وتحديث كامل أقسام وأصناف المنيو (95 صنف)
+    </button>
+  </div>
+
   <!-- إضافة قسم جديد -->
   <div class="panel">
     <h2><i class="fa-solid fa-folder-plus"></i> إضافة قسم جديد إلى (<span id="txt-current-section-cat">صالة المطعم</span>)</h2>
@@ -736,14 +747,6 @@
 
       // 1. صالة المطعم
       const restaurantCategories = [
-        {
-          id: "res_breakfast", name_ar: "الإفطار", name_en: "Breakfast", icon: "🍳",
-          items: [
-            { name_ar: "فطار كونتيننتال", name_en: "Continental Breakfast", desc_ar: "مياة معدنية - شاي - جبنة بيضاء - جبنة شيدر - جبنة رومى - علبة زبادى بوشن - عيش توست - إنجلش كيك - باتيه بالجبنة - كرواسون - دانش.", desc_en: "Mineral water, tea, white cheese, cheddar cheese, roumy cheese, yogurt portion, toast bread, English cake, cheese pâté, croissant, Danish.", img: "", member_price: 160, guest_price: 175 },
-            { name_ar: "فطار شرقى", name_en: "Oriental Breakfast", desc_ar: "مياة معدنية - شاي - بيض مسلوق - جبنة بيضاء - فول معلب - طعمية - بطاطس - ميكس سلاد - عيش بلدى.", desc_en: "Mineral water, tea, boiled egg, white cheese, canned fava beans, falafel, potatoes, mixed salad, baladi bread.", img: "", member_price: 160, guest_price: 175 },
-            { name_ar: "فطار فلاحى", name_en: "Traditional Baladi Breakfast", desc_ar: "مياة معدنية - شاي - فطير مشلتت - جبنة قديمة - بيض مسلوق - عسل أسود - طحينة خام - عسل أبيض.", desc_en: "Mineral water, tea, feteer meshaltet, aged cheese (gebna qadima), boiled egg, black molasses, raw tahini, white honey.", img: "", member_price: 160, guest_price: 175 }
-          ]
-        },
         {
           id: "res_soup", name_ar: "الشوربة", name_en: "Soups", icon: "🥣",
           items: [
